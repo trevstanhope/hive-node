@@ -66,7 +66,7 @@ class HiveNode:
   def update(self):
     
     print('\n')
-    log = {'time':int(time.time()), 'node':self.NODE_ID}
+    log = {'time':time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()), 'node':self.NODE_ID}
     
     print('[Reading Arduino Sensors]')
     try:
@@ -75,6 +75,8 @@ class HiveNode:
       log.update(data)
       print('-->' + str(log))
     except Exception as error:
+      log['internal_temp'] = 0
+      log['external_temp'] = 0
       print('--> ' + str(error))
       
     print('[Capturing Audio]')
@@ -99,6 +101,8 @@ class HiveNode:
       stream.stop_stream()
       log.update({'decibels': decibels, 'frequency': frequency})
     except Exception as error:
+      log['frequency'] = 0
+      log['decibels'] = 0
       print('--> ' + str(error))
     
     print('[Sending Message to Aggregator]')
@@ -140,5 +144,5 @@ if __name__ == '__main__':
   currdir = os.path.dirname(os.path.abspath(__file__))
   cherrypy.server.socket_host = node.CHERRYPY_ADDR
   cherrypy.server.socket_port = node.CHERRYPY_PORT
-  conf = {'/www': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'www')}}
-  cherrypy.quickstart(node, '/', config=conf)
+ # conf = {'/www': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'www')}}
+  cherrypy.quickstart(node, '/')
