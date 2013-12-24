@@ -1,0 +1,16 @@
+# lo
+auto lo
+iface lo inet loopback
+
+# eth0
+iface eth0 inet dhcp
+
+# wlan0
+auto wlan0
+iface wlan0 inet static
+  address 192.168.1.1
+  netmask 255.255.255.0
+  wireless-channel 1
+  wireless-mode ad-hoc
+  wireless-essid EDR9WE
+  wireless-psk S65PVK
