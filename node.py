@@ -88,7 +88,6 @@ class HiveNode:
       string = self.arduino.readline()
       data = ast.literal_eval(string)
       log.update(data)
-      print('-->' + str(log))
     except Exception as error:
       print('--> ' + str(error))
     print('[Capturing Audio]')
@@ -107,10 +106,10 @@ class HiveNode:
       print('--> ' + str(error))
     print('[Sending Message to Aggregator]')
     try:
-      dump = json.dumps(log)
-      result = self.socket.send(dump)
       for key in log:
         print('--> ' + key + ' : ' + str(log[key]))
+      dump = json.dumps(log)
+      result = self.socket.send(dump)
     except Exception as error:
       print('--> ' + str(error))
     print('[Receiving Response from Aggregator]')
