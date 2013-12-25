@@ -1,0 +1,4 @@
+#!/bin/sh -e
+cd /home/pi/HiveMind-Node
+python node.py configs/node.conf
+exit 0
