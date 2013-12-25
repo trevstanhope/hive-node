@@ -61,7 +61,17 @@ class HiveNode:
     except Exception as error:
       print('--> ' + str(error))
     self.START_TIME = time.time()
+    print('[Initializing Monitor]')
     Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
+    print('[Initializing Microphone]')
+    try:
+      asound = cdll.LoadLibrary('libasound.so')
+      asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
+      mic = pyaudio.PyAudio()
+      self.stream = mic.open(format=self.FORMAT,channels=self.CHANNELS,rate=self.RATE,input=True,frames_per_buffer=self.CHUNK)
+      self.stream.stop_stream()
+    except Exception as error:
+      print('-->' + str(error))
 
   ## Update to Aggregator
   def update(self):
