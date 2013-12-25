@@ -19,6 +19,7 @@ import cherrypy
 from cherrypy.process.plugins import Monitor
 from cherrypy import tools
 import os
+import numpy as np
 
 # Error Handling
 ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)

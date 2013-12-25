@@ -8,6 +8,8 @@ sudo apt-get install python-zmq -y
 sudo apt-get install python-serial -y
 sudo apt-get install python-cherrypy3 -y
 sudo apt-get install python-pyaudio -y
+sudo apt-get install python-alsaaudio -y
+sudo apt-get install libasound2 -y
 
 # Alamode
 sudo cp configs/avrdude /usr/bin/avrdude
