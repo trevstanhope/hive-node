@@ -64,10 +64,8 @@ class HiveNode:
 
   ## Update to Aggregator
   def update(self):
-    
     print('\n')
     log = {'time':time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()), 'node':self.NODE_ID}
-    
     print('[Reading Arduino Sensors]')
     try:
       string = self.arduino.read()
@@ -75,10 +73,7 @@ class HiveNode:
       log.update(data)
       print('-->' + str(log))
     except Exception as error:
-      log['internal_temp'] = 0
-      log['external_temp'] = 0
       print('--> ' + str(error))
-      
     print('[Capturing Audio]')
     try:
       asound = cdll.LoadLibrary('libasound.so')
@@ -101,10 +96,7 @@ class HiveNode:
       stream.stop_stream()
       log.update({'decibels': decibels, 'frequency': frequency})
     except Exception as error:
-      log['frequency'] = 0
-      log['decibels'] = 0
       print('--> ' + str(error))
-    
     print('[Sending Message to Aggregator]')
     try:
       dump = json.dumps(log)
@@ -113,7 +105,6 @@ class HiveNode:
         print('--> ' + key + ' : ' + str(log[key]))
     except Exception as error:
       print('--> ' + str(error))
-      
     print('[Receiving Response from Aggregator]')
     try:
       socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
