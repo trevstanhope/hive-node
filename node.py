@@ -68,7 +68,13 @@ class HiveNode:
       asound = cdll.LoadLibrary('libasound.so')
       asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
       mic = pyaudio.PyAudio()
-      self.stream = mic.open(format=self.FORMAT,channels=self.CHANNELS,rate=self.RATE,input=True,frames_per_buffer=self.CHUNK)
+      self.stream = mic.open(
+	format=self.FORMAT,
+	channels=self.CHANNELS,
+	rate=self.RATE,
+	input=True,
+	frames_per_buffer=self.CHUNK
+      )
       self.stream.stop_stream()
     except Exception as error:
       print('-->' + str(error))
@@ -87,24 +93,15 @@ class HiveNode:
       print('--> ' + str(error))
     print('[Capturing Audio]')
     try:
-      asound = cdll.LoadLibrary('libasound.so')
-      asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
-      mic = pyaudio.PyAudio()
-      stream = mic.open(
-        format=self.FORMAT,
-        channels=self.CHANNELS,
-        rate=self.RATE,
-        input=True,
-        frames_per_buffer=self.CHUNK
-      )
-      data = stream.read(self.CHUNK)
+      self.stream.start_stream()
+      data = self.stream.read(self.CHUNK)
       wave_array = np.fromstring(data, dtype='int16')
       wave_fft = np.fft.fft(wave_array)
       wave_freqs = np.fft.fftfreq(len(wave_fft))
       frequency = RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)])
       amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
       decibels =  10*np.log10(amplitude)
-      stream.stop_stream()
+      self.stream.stop_stream()
       log.update({'decibels': decibels, 'frequency': frequency})
     except Exception as error:
       print('--> ' + str(error))
