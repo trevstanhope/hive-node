@@ -49,7 +49,55 @@ class HiveNode:
     print('[Initializing ZMQ]')
     try:
       self.context = zmq.Context()
-      self.socket = se= np.fft.fftfreq(len(wave_fft))
+      self.socket = self.context.socket(zmq.REQ)
+      self.socket.connect(self.ZMQ_SERVER)
+      self.poller = zmq.Poller()
+      self.poller.register(self.socket, zmq.POLLIN)
+    except Exception as error:
+      print('--> ' + str(error))
+    print('[Initializing Arduino]')
+    try:
+      self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
+    except Exception as error:
+      print('--> ' + str(error))
+    self.START_TIME = time.time()
+    print('[Initializing Monitor]')
+    Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
+    print('[Initializing Microphone]')
+    try:
+      asound = cdll.LoadLibrary('libasound.so')
+      asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
+      mic = pyaudio.PyAudio()
+      self.stream = mic.open(
+	format=self.FORMAT,
+	channels=self.CHANNELS,
+	rate=self.RATE,
+	input=True,
+	frames_per_buffer=self.CHUNK
+      )
+      self.stream.stop_stream()
+    except Exception as error:
+      print('-->' + str(error))
+
+  ## Update to Aggregator
+  def update(self):
+    print('\n')
+    log = {'time':time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()), 'node':self.NODE_ID}
+    print('[Reading Arduino Sensors]')
+    try:
+      string = self.arduino.readline()
+      data = ast.literal_eval(string)
+      log.update(data)
+      print('-->' + str(log))
+    except Exception as error:
+      print('--> ' + str(error))
+    print('[Capturing Audio]')
+    try:
+      self.stream.start_stream()
+      data = self.stream.read(self.CHUNK)
+      wave_array = np.fromstring(data, dtype='int16')
+      wave_fft = np.fft.fft(wave_array)
+      wave_freqs = np.fft.fftfreq(len(wave_fft))
       frequency = self.RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)])
       amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
       decibels =  10*np.log10(amplitude)
