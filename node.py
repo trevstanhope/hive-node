@@ -56,7 +56,7 @@ class HiveNode:
       print('--> ' + str(error))
     print('[Initializing Arduino]')
     try:
-      self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_INTERVAL)
+      self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
     except Exception as error:
       print('--> ' + str(error))
     self.START_TIME = time.time()
@@ -68,7 +68,7 @@ class HiveNode:
     log = {'time':time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()), 'node':self.NODE_ID}
     print('[Reading Arduino Sensors]')
     try:
-      string = self.arduino.read()
+      string = self.arduino.readline()
       data = ast.literal_eval(string)
       log.update(data)
       print('-->' + str(log))
