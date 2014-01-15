@@ -1,4 +1,4 @@
 #!/bin/sh -e
-cd /home/pi/HiveMind-Node
-python node.py configs/node.conf
+cd /home/pi/HiveMind_Node
+python HiveMind_Node.py configs/node.conf
 exit 0

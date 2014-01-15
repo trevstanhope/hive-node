@@ -11,7 +11,7 @@
 #	make upload
 
 ARDUINO_DIR = /usr/share/arduino
-TARGET = monitor
+TARGET = HiveMind_Node
 BOARD_TAG = alamode # for dev use 'uno'
 ARDUINO_PORT = /dev/ttyS0 # for dev use '/dev/ttyACM0'
 ARDUINO_LIBS = DHT SoftwareSerial stdio
