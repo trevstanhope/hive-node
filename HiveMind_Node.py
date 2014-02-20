@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-HiveMind-Plus Node
+HiveMind Node
 Developed by Trevor Stanhope
 """
 
@@ -36,7 +36,7 @@ class HiveNode:
     try:
       self.CONFIG_FILE = sys.argv[1]
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
       self.CONFIG_FILE = 'node.conf'
     print('--> ' + self.CONFIG_FILE)
     with open(self.CONFIG_FILE) as config:
@@ -54,12 +54,12 @@ class HiveNode:
       self.poller = zmq.Poller()
       self.poller.register(self.socket, zmq.POLLIN)
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
     print('[Initializing Arduino]')
     try:
       self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
     self.START_TIME = time.time()
     print('[Initializing Monitor]')
     Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
@@ -77,7 +77,7 @@ class HiveNode:
       )
       self.stream.stop_stream()
     except Exception as error:
-      print('-->' + str(error))
+      print('--> error : ' + str(error))
 
   ## Update to Aggregator
   def update(self):
@@ -89,7 +89,7 @@ class HiveNode:
       data = ast.literal_eval(string)
       log.update(data)
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
     print('[Capturing Audio]')
     try:
       self.stream.start_stream()
@@ -103,7 +103,7 @@ class HiveNode:
       self.stream.stop_stream()
       log.update({'decibels': decibels, 'frequency': frequency})
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
     print('[Sending Message to Aggregator]')
     try:
       for key in log:
@@ -111,7 +111,7 @@ class HiveNode:
       dump = json.dumps(log)
       result = self.socket.send(dump)
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
     print('[Receiving Response from Aggregator]')
     try:
       socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
@@ -124,9 +124,9 @@ class HiveNode:
         else:
           print('--> ' + 'Timeout: ' + self.ZMQ_TIMEOUT + 'ms')
       else:
-         print('--> ' + 'No messages from Aggregator found')
+         print('--> warning : ' + 'No messages from Aggregator found')
     except Exception as error:
-      print('--> ' + str(error))
+      print('--> error : ' + str(error))
   
   ## Render Index
   @cherrypy.expose
