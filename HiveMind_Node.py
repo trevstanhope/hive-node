@@ -32,7 +32,8 @@ class HiveNode:
 
   ## Initialize
   def __init__(self):
-    print('[Reloading Config File]')
+
+    print('[Loading Config File]')
     try:
       self.CONFIG_FILE = sys.argv[1]
     except Exception as error:
@@ -46,6 +47,7 @@ class HiveNode:
           getattr(self, key)
         except AttributeError as error:
           setattr(self, key, settings[key])
+
     print('[Initializing ZMQ]')
     try:
       self.context = zmq.Context()
@@ -55,14 +57,17 @@ class HiveNode:
       self.poller.register(self.socket, zmq.POLLIN)
     except Exception as error:
       print('--> error : ' + str(error))
+
     print('[Initializing Arduino]')
     try:
       self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
     except Exception as error:
       print('--> error : ' + str(error))
     self.START_TIME = time.time()
+
     print('[Initializing Monitor]')
     Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
+
     print('[Initializing Microphone]')
     try:
       asound = cdll.LoadLibrary('libasound.so')
@@ -81,15 +86,16 @@ class HiveNode:
 
   ## Update to Aggregator
   def update(self):
-    print('\n')
     log = {'time':time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime()), 'node':self.NODE_ID}
-    print('[Reading Arduino Sensors]')
+
+    print('\n[Reading Arduino Sensors]')
     try:
       string = self.arduino.readline()
       data = ast.literal_eval(string)
       log.update(data)
     except Exception as error:
       print('--> error : ' + str(error))
+
     print('[Capturing Audio]')
     try:
       self.stream.start_stream()
@@ -104,6 +110,7 @@ class HiveNode:
       log.update({'decibels': decibels, 'frequency': frequency})
     except Exception as error:
       print('--> error : ' + str(error))
+
     print('[Sending Message to Aggregator]')
     try:
       for key in log:
@@ -112,6 +119,7 @@ class HiveNode:
       result = self.socket.send(dump)
     except Exception as error:
       print('--> error : ' + str(error))
+
     print('[Receiving Response from Aggregator]')
     try:
       socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
@@ -134,7 +142,8 @@ class HiveNode:
     node = '<p>' + 'node: ' + str(self.NODE_ID) + '</p>'
     start_time = '<p>' + 'Start: ' + time.strftime("%H:%M", time.localtime(self.START_TIME)) + '</p>'
     up_time = '<p>' + 'Up: ' + str(int(time.time() - self.START_TIME)) + '</p>'
-    return node + start_time + up_time
+    html = node + start_time + up_time
+    return html
     
 # Main
 if __name__ == '__main__':
