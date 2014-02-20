@@ -23,8 +23,13 @@ sudo chgrp root /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo chmod a+s /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo cp -r libs/DHT /usr/share/arduino/libraries
 
-# Networking
+# Connect to local wireless network
+#sudo mv /etc/network/interfaces /etc/network/interfaces.backup
 #sudo cp configs/interfaces /etc/network
+
+# Apache2 port-forward 8081 to 80
+#sudo cp configs/HiveMind /etc/apache2/sites-available/
+#sudo a2ensite HiveMind
 
 # Start on boot
 #sudo cp configs/rc.local /etc/
