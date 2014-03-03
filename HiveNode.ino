@@ -85,7 +85,7 @@ void loop() {
   dtostrf(get_ext_C(), DIGITS, PRECISION, ext_C);
   dtostrf(get_int_RH(), DIGITS, PRECISION, int_RH);
   dtostrf(get_int_C(), DIGITS, PRECISION, int_C);
-  sprintf(output, "{'internal_temp':%s, 'external_temp':%s, 'internal_humidity':%s, 'external_humidity':%s}", int_C, ext_C, int_RH, ext_RH);
+  sprintf(output, "{'int_temp':%s, 'ext_temp':%s, 'int_humidity':%s, 'ext_humidity':%s}", int_C, ext_C, int_RH, ext_RH);
   
   // Log to file
 //  File dataFile = SD.open("datalog.txt", FILE_WRITE);
