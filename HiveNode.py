@@ -7,7 +7,7 @@ Hive sensor node based on RaspberryPi and Arduino.
 TODO:
 - Authenticate to aggregator?
 - Set environment variables/keys by JSON
-- 
+- Validate data received from Arduino
 """
 
 # Libraries
@@ -49,6 +49,7 @@ class HiveNode:
                 try:
                     getattr(self, key)
                 except AttributeError as error:
+                    print(key + ' : ' + str(settings[key]))
                     setattr(self, key, settings[key])
 
         print('[Initializing ZMQ]')
@@ -148,6 +149,7 @@ class HiveNode:
 
     ## Update to Aggregator
     def update(self):
+        print('\n')
         sample = {
             'time':time.strftime("%Y-%m-%d-%H-%M-%S",
             time.localtime()),

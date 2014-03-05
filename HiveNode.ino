@@ -1,8 +1,10 @@
-
 /* 
   HiveMind Arduino Sensor Monitor
   Developed by Trevor Stanhope
   DAQ controller for single-hive urban beekeepers.
+
+  TODO:
+  - 
 */
 
 /* --- Libraries --- */
