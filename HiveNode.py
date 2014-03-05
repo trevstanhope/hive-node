@@ -60,13 +60,13 @@ class HiveNode:
             self.poller = zmq.Poller()
             self.poller.register(self.socket, zmq.POLLIN)
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
 
         print('[Initializing Arduino]')
         try:
             self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
         self.START_TIME = time.time()
 
         print('[Initializing Monitor]')
@@ -86,7 +86,7 @@ class HiveNode:
             )
             self.microphone.stop_stream()
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
 
     ## Capture Audio
     def capture_audio(self):
@@ -104,7 +104,7 @@ class HiveNode:
             result = {'decibels': decibels, 'frequency': frequency}
             return result
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
             return None
 
     ## Read Arduino
@@ -115,7 +115,7 @@ class HiveNode:
             result = ast.literal_eval(string)
             return result
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
             return None
 
     ## Send sample to aggregator
@@ -126,7 +126,7 @@ class HiveNode:
             result = self.socket.send(dump)
             return result
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
             return None
     
     ## Receive response from aggregator
@@ -144,15 +144,13 @@ class HiveNode:
             else:
                 return None
         except Exception as error:
-            print('--> error : ' + str(error))
+            print('--> ERROR: ' + str(error))
             return None
 
     ## Update to Aggregator
     def update(self):
         print('\n')
         sample = {
-            'time':time.strftime("%Y-%m-%d-%H-%M-%S",
-            time.localtime()),
             'node':self.NODE_ID
         }
         arduino_result = self.read_arduino()
@@ -179,5 +177,7 @@ if __name__ == '__main__':
     currdir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.server.socket_host = node.CHERRYPY_ADDR
     cherrypy.server.socket_port = node.CHERRYPY_PORT
-    conf = {'/static': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')}}
+    conf = {'/static': 
+        {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')}
+    }
     cherrypy.quickstart(node, '/', config=conf)
