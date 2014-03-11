@@ -26,9 +26,13 @@ from cherrypy.process.plugins import Monitor
 from cherrypy import tools
 import os
 import numpy as np
+import random
 
 # Constants
-CONFIG_FILE = 'settings.json'
+try:
+    CONFIG_FILE = sys.argv[1]
+except Exception as err:
+    CONFIG_FILE = 'settings.json'
 
 # Error Handling
 ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -67,7 +71,6 @@ class HiveNode:
             self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
         except Exception as error:
             print('--> ERROR: ' + str(error))
-        self.START_TIME = time.time()
 
         print('[Initializing Monitor]')
         Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
@@ -151,8 +154,10 @@ class HiveNode:
     def update(self):
         print('\n')
         sample = {
-            'node':self.NODE_ID
+            'hive_id':self.HIVE_ID
         }
+        sample['temperature'] = random.randint(0,100) #RANDOM
+        sample['humidity'] = random.randint(0,100) #RANDOM
         arduino_result = self.read_arduino()
         if not arduino_result == None:
             sample.update(arduino_result)
@@ -165,10 +170,7 @@ class HiveNode:
     ## Render Index
     @cherrypy.expose
     def index(self):
-        node = '<p>' + 'node: ' + str(self.NODE_ID) + '</p>'
-        start_time = '<p>' + 'Start: ' + time.strftime("%H:%M", time.localtime(self.START_TIME)) + '</p>'
-        up_time = '<p>' + 'Up: ' + str(int(time.time() - self.START_TIME)) + '</p>'
-        html = node + start_time + up_time
+        html = open('static/index.html').read()
         return html
     
 # Main
@@ -177,7 +179,7 @@ if __name__ == '__main__':
     currdir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.server.socket_host = node.CHERRYPY_ADDR
     cherrypy.server.socket_port = node.CHERRYPY_PORT
-    conf = {'/static': 
-        {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')}
+    conf = {
+        '/static': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')}
     }
     cherrypy.quickstart(node, '/', config=conf)
