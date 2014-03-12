@@ -165,12 +165,27 @@ class HiveNode:
         if not microphone_result == None:
             sample.update(microphone_result)
         self.send_sample(sample)
-        self.receive_response()
+        print('--> sample : ' + str(sample))
+        response = self.receive_response()
+        print('--> response : ' + str(response))
+        self.sample = sample
+        self.response = response
   
     ## Render Index
     @cherrypy.expose
     def index(self):
-        html = open('static/index.html').read()
+        with open('static/index.html') as index:
+            header = index.read()
+            body_start = '<body>\n'        
+            body_end = '</body>\n'
+            par_start = '<p>'
+            par_end = '</p>'
+            html_end = '</html>'
+            tab = '    '
+            body = ''
+            for key in self.sample:
+                body += tab + par_start + key + ' : ' + str(self.sample[key]) + par_end + '\n'
+            html = header + body_start + body + body_end + html_end
         return html
     
 # Main
