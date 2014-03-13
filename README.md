@@ -7,13 +7,14 @@ HiveMind allows any amateur bee-keeper to monitor their hives in real-time.
 ## Setup
 To install all dependencies for the system, run the following:
 
-    ./configure.sh
-  
-Next, setup the system with a unique ESSID and password:
-
-    python setup.py
+    chmod +x install.sh
+    ./install.sh
     
-Copy down the random essid and password, this is how you'll connect to the box.
+## To Run
+The HiveNode daemon will start on boot, via /etc/rc.local, but can be executed
+manually from the git repository:
+
+    sudo python HiveNode.py
 
 ## Data Folder
 CSV-files and json files are temporarily stored here.
@@ -21,6 +22,5 @@ CSV-files and json files are temporarily stored here.
 
 ## Static Folder
 Served files are kept here
-    
     
 
