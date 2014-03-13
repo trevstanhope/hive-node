@@ -12,21 +12,20 @@ TODO:
 
 # Libraries
 import zmq
-import serial
-from serial import SerialException
 import ast
 import json
-import time
 import os
 import sys
 import pyaudio
-from ctypes import *
 import cherrypy
-from cherrypy.process.plugins import Monitor
-from cherrypy import tools
-import os
 import numpy as np
 import random
+from datetime import datetime
+from serial import Serial, SerialException
+from ctypes import *
+from serial import Serial, SerialException
+from cherrypy.process.plugins import Monitor
+from cherrypy import tools
 
 # Constants
 try:
@@ -44,18 +43,27 @@ C_ERROR_HANDLER = ERROR_HANDLER_FUNC(py_error_handler)
 class HiveNode:
 
   ## Initialize
-    def __init__(self):
+    def __init__(self, config):
 
         print('[Loading Config File]')
-        with open(CONFIG_FILE) as config_file:
-            settings = ast.literal_eval(config_file.read())
+        with open(config) as config_file:
+            settings = json.loads(config_file.read())
+            print('--> settings : ' + json.dumps(settings, sort_keys=True, indent=4))
             for key in settings:
                 try:
                     getattr(self, key)
                 except AttributeError as error:
-                    print(key + ' : ' + str(settings[key]))
                     setattr(self, key, settings[key])
-
+                    
+        print('[Initializing Logs]')
+        try:
+            with open('data/temperature.csv', 'w') as csv_file:
+                csv_file.write('date,temperature,\n')
+            with open('data/humidity.csv', 'w') as csv_file:
+                csv_file.write('date,humidity,\n')
+        except Exception as error:
+            print('--> ERROR: ' + str(error))
+        
         print('[Initializing ZMQ]')
         try:
             self.context = zmq.Context()
@@ -68,7 +76,7 @@ class HiveNode:
 
         print('[Initializing Arduino]')
         try:
-            self.arduino = serial.Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
+            self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
         except Exception as error:
             print('--> ERROR: ' + str(error))
 
@@ -149,52 +157,69 @@ class HiveNode:
         except Exception as error:
             print('--> ERROR: ' + str(error))
             return None
-
+            
+    ## Save Data
+    def save_data(self, sample):
+        print('[Saving Data to File]')
+        try:
+            temperature = str(sample['temperature'])
+            humidity = str(sample['humidity'])
+            time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+            with open('data/temperature.csv', 'a') as csv_file:
+                csv_file.write(','.join([time, temperature, '\n']))
+            with open('data/humidity.csv', 'a') as csv_file:
+                csv_file.write(','.join([time, humidity, '\n']))
+        except Exception as error:
+            print('--> ERROR: ' + str(error))
+    
+    ## Generate random sample
+    def random_sample(self):
+        print('[Generating Random Sample]')
+        sample = {
+            'hive_id': self.HIVE_ID,
+            'voltage': random.uniform(0, 14.2),
+            'temperature' : random.uniform(0, 50.0),
+            'humidity' : random.uniform(0, 100.0),
+            'amperage' : random.uniform(0, 2.0),
+        }
+        return sample
+        
+    ## Display
+    def display(self, sample, response):
+        print('[Displaying Results]')
+        print('--> sample : ' + json.dumps(sample, sort_keys=True, indent=4))
+        print('--> response : ' + json.dumps(response, sort_keys=True, indent=4))
+        
     ## Update to Aggregator
     def update(self):
         print('\n')
-        sample = {
-            'hive_id':self.HIVE_ID
-        }
-        sample['temperature'] = random.randint(0,100) #RANDOM
-        sample['humidity'] = random.randint(0,100) #RANDOM
+        sample = self.random_sample()
         arduino_result = self.read_arduino()
         if not arduino_result == None:
             sample.update(arduino_result)
         microphone_result = self.capture_audio()
         if not microphone_result == None:
-            sample.update(microphone_result)
+            sample.update(microphone_result) 
         self.send_sample(sample)
-        print('--> sample : ' + str(sample))
         response = self.receive_response()
-        print('--> response : ' + str(response))
-        self.sample = sample
-        self.response = response
+        self.save_data(sample)
+        if self.DEBUG == True:
+            self.display(sample, response)
   
     ## Render Index
     @cherrypy.expose
     def index(self):
-        with open('static/index.html') as index:
-            header = index.read()
-            body_start = '<body>\n'        
-            body_end = '</body>\n'
-            par_start = '<p>'
-            par_end = '</p>'
-            html_end = '</html>'
-            tab = '    '
-            body = ''
-            for key in self.sample:
-                body += tab + par_start + key + ' : ' + str(self.sample[key]) + par_end + '\n'
-            html = header + body_start + body + body_end + html_end
-        return html
+        with open('static/index.html') as html:
+            return html.read()
     
 # Main
 if __name__ == '__main__':
-    node = HiveNode()
+    node = HiveNode(config=CONFIG_FILE)
     currdir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.server.socket_host = node.CHERRYPY_ADDR
     cherrypy.server.socket_port = node.CHERRYPY_PORT
     conf = {
-        '/static': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')}
+        '/': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')},
+        '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')}, # NEED the '/' before the folder name
     }
     cherrypy.quickstart(node, '/', config=conf)

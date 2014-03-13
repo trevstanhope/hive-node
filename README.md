@@ -15,6 +15,12 @@ Next, setup the system with a unique ESSID and password:
     
 Copy down the random essid and password, this is how you'll connect to the box.
 
+## Data Folder
+CSV-files and json files are temporarily stored here.
+* Files in this directory are ignored by git
+
+## Static Folder
+Served files are kept here
     
     
 
