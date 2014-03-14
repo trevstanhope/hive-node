@@ -246,5 +246,6 @@ if __name__ == '__main__':
     conf = {
         '/': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')},
         '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')}, # NEED the '/' before the folder name
+        '/js': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static','js')}, # NEED the '/' before the folder name
     }
     cherrypy.quickstart(node, '/', config=conf)
