@@ -132,7 +132,6 @@ class HiveNode:
     def send_sample(self, sample):
         print('[Sending Sample]')
         try:
-            sample['hive_id'] = self.HIVE_ID
             dump = json.dumps(sample)
             result = self.socket.send(dump)
             return result
@@ -174,6 +173,7 @@ class HiveNode:
     def random_sample(self):
         print('[Generating Random Sample]')
         sample = {
+            'hive_id' : self.HIVE_ID,
             'int_C' : random.uniform(0, 50.0),
             'int_RH': random.uniform(0, 100.0),
             'ext_C' : random.uniform(0, 50.0),
@@ -181,6 +181,21 @@ class HiveNode:
             'amps' : random.uniform(0, 2.0),
             'volts' : random.uniform(0, 14.2),
             'relay' : random.randint(0,1),
+        }
+        return sample
+    
+    ## Generate blank sample
+    def blank_sample(self):
+        print('[Generating Random Sample]')
+        sample = {
+            'hive_id' : self.HIVE_ID,
+            'int_C' : 0,
+            'int_RH': 0,
+            'ext_C' : 0,
+            'ext_RH' : 0,
+            'amps' : 0,
+            'volts' : 0,
+            'relay' : 0
         }
         return sample
         
@@ -196,26 +211,25 @@ class HiveNode:
         try:
             self.arduino.close()
             self.microphone.close()
+            sys.exit() 
         except Exception as error:
             print('--> ERROR: ' + str(error))
-        sys.exit()  
               
     ## Update to Aggregator
     def update(self):
     
         ### Generate empty sample
         print('\n')
-        sample = self.random_sample()
+        sample = self.blank_sample()
         
         ### Read Arduino
         sensors = self.read_arduino()
-        if not sensors == None:
-            if sensors['relay'] == 1:
-                sample.update(sensors)
-            else:
-                self.shutdown()
-        else:
+        if sensors == None:
             pass
+        elif (sensors['relay'] == 1):
+            sample.update(sensors)
+        else:
+            self.shutdown()
             
         ### Listen on Mic
         microphone_result = self.capture_audio()
