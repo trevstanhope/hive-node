@@ -169,21 +169,6 @@ class HiveNode:
         except Exception as error:
             print('--> ERROR: ' + str(error))
     
-    ## Generate random sample
-    def random_sample(self):
-        print('[Generating Random Sample]')
-        sample = {
-            'hive_id' : self.HIVE_ID,
-            'int_C' : random.uniform(0, 50.0),
-            'int_RH': random.uniform(0, 100.0),
-            'ext_C' : random.uniform(0, 50.0),
-            'ext_RH' : random.uniform(0, 100.0),
-            'amps' : random.uniform(0, 2.0),
-            'volts' : random.uniform(0, 14.2),
-            'relay' : random.randint(0,1),
-        }
-        return sample
-    
     ## Generate blank sample
     def blank_sample(self):
         print('[Generating Random Sample]')
@@ -217,12 +202,8 @@ class HiveNode:
               
     ## Update to Aggregator
     def update(self):
-    
-        ### Generate empty sample
         print('\n')
         sample = self.blank_sample()
-        
-        ### Read Arduino
         sensors = self.read_arduino()
         if sensors == None:
             pass
@@ -230,18 +211,12 @@ class HiveNode:
             sample.update(sensors)
         else:
             self.shutdown()
-            
-        ### Listen on Mic
         microphone_result = self.capture_audio()
         if not microphone_result == None:
             sample.update(microphone_result) 
-    
-        ### Try to send sample
         self.send_sample(sample)
         response = self.receive_response()
         self.save_data(sample)
-        
-        ### Display results
         if self.DEBUG == True:
             self.display(sample, response)
   
