@@ -48,7 +48,7 @@ class HiveNode:
         print('[Loading Config File]')
         with open(config) as config_file:
             settings = json.loads(config_file.read())
-            print('--> settings : ' + json.dumps(settings, sort_keys=True, indent=4))
+            print('\tsettings : ' + json.dumps(settings, sort_keys=True, indent=4))
             for key in settings:
                 try:
                     getattr(self, key)
@@ -57,11 +57,11 @@ class HiveNode:
                     
         print('[Initializing Logs]')
         try:
-            for param in ['int_C', 'ext_C', 'int_RH','ext_RH','volts','amps']:
+            for param in self.PARAMS:
                 with open('data/' + param + '.csv', 'w') as csv_file:
                     csv_file.write('date,val,\n') # no spaces!
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\t ERROR: ' + str(error))
         
         print('[Initializing ZMQ]')
         try:
@@ -71,13 +71,13 @@ class HiveNode:
             self.poller = zmq.Poller()
             self.poller.register(self.socket, zmq.POLLIN)
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
 
         print('[Initializing Arduino]')
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
 
         print('[Initializing Monitor]')
         Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
@@ -95,8 +95,9 @@ class HiveNode:
 	            frames_per_buffer=self.CHUNK
             )
             self.microphone.stop_stream()
+            print('\tOKAY')
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
 
     ## Capture Audio
     def capture_audio(self):
@@ -111,10 +112,11 @@ class HiveNode:
             amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
             decibels =  10*np.log10(amplitude)
             self.microphone.stop_stream()
-            result = {'decibels': decibels, 'frequency': frequency}
+            result = {'db': decibels, 'hz': frequency}
+            print('\t' + str(result))
             return result
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
             return None
 
     ## Read Arduino
@@ -123,9 +125,10 @@ class HiveNode:
         try:
             string = self.arduino.readline()
             result = ast.literal_eval(string)
+            print('\t' + str(result))
             return result
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
             return None
 
     ## Send sample to aggregator
@@ -134,9 +137,10 @@ class HiveNode:
         try:
             dump = json.dumps(sample)
             result = self.socket.send(dump)
+            print('\t' + str(result))
             return result
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
             return None
     
     ## Receive response from aggregator
@@ -148,47 +152,35 @@ class HiveNode:
                 if socks.get(self.socket) == zmq.POLLIN:
                     dump = self.socket.recv(zmq.NOBLOCK)
                     response = json.loads(dump)
+                    print('\t' + str(response))
                     return response
                 else:
                     return None
             else:
                 return None
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
             return None
             
     ## Save Data
     def save_data(self, sample):
         print('[Saving Data to File]')
-        try:
+        if sample:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-            for param in ['int_C', 'ext_C', 'int_RH','ext_RH','volts','amps']:
-                with open('data/' + param + '.csv', 'a') as csv_file:
-                    csv_file.write(','.join([time, str(sample[param]), '\n']))
-                
-        except Exception as error:
-            print('--> ERROR: ' + str(error))
+            for param in self.PARAMS:
+                try:
+                    with open('data/' + param + '.csv', 'a') as csv_file:
+                        csv_file.write(','.join([time, str(sample[param]), '\n']))
+                    print('\tOKAY: ' + param)
+                except Exception as error:
+                    print('\tERROR: ' + str(error)) 
+        
     
     ## Generate blank sample
     def blank_sample(self):
         print('[Generating Random Sample]')
-        sample = {
-            'hive_id' : self.HIVE_ID,
-            'int_C' : 0,
-            'int_RH': 0,
-            'ext_C' : 0,
-            'ext_RH' : 0,
-            'amps' : 0,
-            'volts' : 0,
-            'relay' : 0
-        }
+        sample = {'hive_id' : self.HIVE_ID}
         return sample
-        
-    ## Display
-    def display(self, sample, response):
-        print('[Displaying Results]')
-        print('--> sample : ' + json.dumps(sample, sort_keys=True, indent=4))
-        print('--> response : ' + json.dumps(response, sort_keys=True, indent=4))
     
     ## Shutdown
     def shutdown(self):
@@ -198,8 +190,21 @@ class HiveNode:
             self.microphone.close()
             sys.exit() 
         except Exception as error:
-            print('--> ERROR: ' + str(error))
-              
+            print('\tERROR: ' + str(error))
+            
+    ## Display
+    def extra(self, sample, response):
+        print('[Extra Stuff]')
+        try:
+            print('\tMEAN: ')
+            print('\tMEDIAN: ')
+            print('\tMAX: ')
+            #print('\t sample : \n' + json.dumps(sample, sort_keys=True, indent=4))
+            #print('\t response : ' + json.dumps(response, sort_keys=True, indent=4))
+        except KeyboardInterrupt:
+            print('\tSUPER MODE')
+        
+               
     ## Update to Aggregator
     def update(self):
         print('\n')
@@ -207,10 +212,8 @@ class HiveNode:
         sensors = self.read_arduino()
         if sensors == None:
             pass
-        elif (sensors['relay'] == 1):
-            sample.update(sensors)
         else:
-            self.shutdown()
+            sample.update(sensors)
         microphone_result = self.capture_audio()
         if not microphone_result == None:
             sample.update(microphone_result) 
@@ -218,7 +221,7 @@ class HiveNode:
         response = self.receive_response()
         self.save_data(sample)
         if self.DEBUG == True:
-            self.display(sample, response)
+            self.extra(sample, response)
   
     ## Render Index
     @cherrypy.expose
