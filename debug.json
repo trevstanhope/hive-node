@@ -1,0 +1,16 @@
+{
+"HIVE_ID": "hive_1",
+"ZMQ_SERVER": "tcp://127.0.0.1:1980",
+"ZMQ_TIMEOUT": 1000,
+"ARDUINO_DEV": "/dev/ttyACM0",
+"ARDUINO_BAUD": 9600,
+"CHANNELS": 1,
+"RATE": 44100,
+"CHUNK": 1024,
+"FORMAT": 8,
+"CHERRYPY_PORT": 8081,
+"CHERRYPY_ADDR": "0.0.0.0",
+"CHERRYPY_INTERVAL": 1,
+"DEBUG":true,
+"PARAMS":["int_t", "ext_t", "int_h","ext_h","volts","amps", "hz","db"]
+}
