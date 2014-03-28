@@ -1,11 +1,9 @@
-# Hivemind
-Aggregator for Bee-hive Health
+# HiveNode
+A HiveNode is a wireless linux device for remotely monitoring beehive health.
+With HiveNode, any amateur bee-keeper can monitor their hives in real-time.
 
-## Overview
-HiveMind allows any amateur bee-keeper to monitor their hives in real-time.
-
-## Setup
-To install all dependencies for the system, run the following:
+## Setup (DEBIAN)
+To install all dependencies for the HiveNode, run the following:
 
     chmod +x install.sh
     ./install.sh
@@ -16,11 +14,12 @@ manually from the git repository:
 
     sudo python HiveNode.py
 
-## Data Folder
-CSV-files and json files are temporarily stored here.
-* Files in this directory are ignored by git
+## /data
+* CSV-files and JSON-files are temporarily stored here.
+* Files in this directory are ignored by git.
 
-## Static Folder
-Served files are kept here
+## /static
+* Files served by the webserver are kept here
+* Customization of these files is encouraged.
     
 
