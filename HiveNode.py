@@ -136,9 +136,8 @@ class HiveNode:
         print('[Sending Sample]')
         try:
             dump = json.dumps(sample)
-            result = self.socket.send(dump)
-            print('\t' + str(result))
-            return result
+            self.socket.send(dump)
+            print('\tOKAY')
         except Exception as error:
             print('\tERROR: ' + str(error))
             return None
@@ -191,20 +190,7 @@ class HiveNode:
             sys.exit() 
         except Exception as error:
             print('\tERROR: ' + str(error))
-            
-    ## Display
-    def extra(self, sample, response):
-        print('[Extra Stuff]')
-        try:
-            print('\tMEAN: ')
-            print('\tMEDIAN: ')
-            print('\tMAX: ')
-            #print('\t sample : \n' + json.dumps(sample, sort_keys=True, indent=4))
-            #print('\t response : ' + json.dumps(response, sort_keys=True, indent=4))
-        except KeyboardInterrupt:
-            print('\tSUPER MODE')
-        
-               
+                          
     ## Update to Aggregator
     def update(self):
         print('\n')
@@ -220,9 +206,7 @@ class HiveNode:
         self.send_sample(sample)
         response = self.receive_response()
         self.save_data(sample)
-        if self.DEBUG == True:
-            self.extra(sample, response)
-  
+       
     ## Render Index
     @cherrypy.expose
     def index(self):
@@ -235,6 +219,7 @@ if __name__ == '__main__':
     currdir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.server.socket_host = node.CHERRYPY_ADDR
     cherrypy.server.socket_port = node.CHERRYPY_PORT
+    cherrypy.config.update({ "environment": "embedded" })
     conf = {
         '/': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')},
         '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')}, # NEED the '/' before the folder name
