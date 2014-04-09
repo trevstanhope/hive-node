@@ -11,6 +11,10 @@
 "CHERRYPY_PORT": 8081,
 "CHERRYPY_ADDR": "0.0.0.0",
 "CHERRYPY_INTERVAL": 1,
+<<<<<<< HEAD
 "DEBUG":false,
 "PARAMS":["int_t", "ext_t", "int_h","ext_h","volts","amps", "hz","db"]
+=======
+"PARAMS":["int_t","ext_t"]
+>>>>>>> f94b3ef23b7633ec95b5aee6a3bfe44bf8b2d9a4
 }

@@ -213,8 +213,7 @@ class HiveNode:
             sys.exit() 
         except Exception as error:
             print('\tERROR: ' + str(error))
-        
-               
+            
     ## Update to Aggregator
     def update(self):
         print('\n')
@@ -236,7 +235,7 @@ class HiveNode:
         self.send_sample(sample)
         response = self.receive_response()
         self.save_data(sample)
-  
+
     ## Render Index
     @cherrypy.expose
     def index(self):
@@ -249,6 +248,7 @@ if __name__ == '__main__':
     currdir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.server.socket_host = node.CHERRYPY_ADDR
     cherrypy.server.socket_port = node.CHERRYPY_PORT
+#    cherrypy.config.update({ "environment": "embedded" })
     conf = {
         '/': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')},
         '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')}, # NEED the '/' before the folder name
