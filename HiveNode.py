@@ -6,7 +6,6 @@ Hive sensor node based on RaspberryPi and Arduino.
 
 TODO:
 - Authenticate to aggregator?
-- Set environment variables/keys by JSON
 - Validate data received from Arduino
 """
 
@@ -23,7 +22,6 @@ import random
 from datetime import datetime
 from serial import Serial, SerialException
 from ctypes import *
-from serial import Serial, SerialException
 from cherrypy.process.plugins import Monitor
 from cherrypy import tools
 
@@ -55,11 +53,12 @@ class HiveNode:
                 except AttributeError as error:
                     setattr(self, key, settings[key])
                     
-        print('[Initializing Logs]')
+        print('[Initializing CSV Logs]')
         try:
             for param in self.PARAMS:
                 with open('data/' + param + '.csv', 'w') as csv_file:
                     csv_file.write('date,val,\n') # no spaces!
+            print('\tOKAY')
         except Exception as error:
             print('\t ERROR: ' + str(error))
         
@@ -70,18 +69,24 @@ class HiveNode:
             self.socket.connect(self.ZMQ_SERVER)
             self.poller = zmq.Poller()
             self.poller.register(self.socket, zmq.POLLIN)
+            print('\tOKAY')
         except Exception as error:
             print('\tERROR: ' + str(error))
 
         print('[Initializing Arduino]')
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
+            print('\tOKAY')
         except Exception as error:
             print('\tERROR: ' + str(error))
 
         print('[Initializing Monitor]')
-        Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
-
+        try:
+            Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
+            print('\tOKAY')
+        except Exception as error:
+            print('\tERROR: ' + str(error))
+            
         print('[Initializing Microphone]')
         try:
             asound = cdll.LoadLibrary('libasound.so')
@@ -136,12 +141,12 @@ class HiveNode:
         print('[Sending Sample]')
         try:
             dump = json.dumps(sample)
-            result = self.socket.send(dump)
-            print('\t' + str(result))
-            return result
+            self.socket.send(dump)
+            print('\tOKAY')
+            return True
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return None
+            return False
     
     ## Receive response from aggregator
     def receive_response(self):
@@ -152,11 +157,13 @@ class HiveNode:
                 if socks.get(self.socket) == zmq.POLLIN:
                     dump = self.socket.recv(zmq.NOBLOCK)
                     response = json.loads(dump)
-                    print('\t' + str(response))
+                    print('\tOKAY: ' + str(response))
                     return response
                 else:
+                    print('\tERROR: Poll Timeout')
                     return None
             else:
+                print('\tERROR: Socket Timeout')
                 return None
         except Exception as error:
             print('\tERROR: ' + str(error))
@@ -175,11 +182,26 @@ class HiveNode:
                 except Exception as error:
                     print('\tERROR: ' + str(error)) 
         
-    
     ## Generate blank sample
     def blank_sample(self):
-        print('[Generating Random Sample]')
+        print('[Generating Blank Sample]')
         sample = {'hive_id' : self.HIVE_ID}
+        return sample
+    
+    ## Generate random sample
+    def random_sample(self):
+        print('[Generating Blank Sample]')
+        sample = {
+            'hive_id' : self.HIVE_ID,
+            'int_t' : random.randint(0,35),
+            'ext_t' : random.randint(0,35),
+            'int_h' : random.randint(0,100),
+            'ext_h' : random.randint(0,100),
+            'volts' : random.randint(0,15),
+            'amps'  : random.randint(0,2),
+            'db'    : random.randint(0,200),
+            'hz'    : random.randint(0,4000),
+        }
         return sample
     
     ## Shutdown
@@ -191,37 +213,29 @@ class HiveNode:
             sys.exit() 
         except Exception as error:
             print('\tERROR: ' + str(error))
-            
-    ## Display
-    def extra(self, sample, response):
-        print('[Extra Stuff]')
-        try:
-            print('\tMEAN: ')
-            print('\tMEDIAN: ')
-            print('\tMAX: ')
-            #print('\t sample : \n' + json.dumps(sample, sort_keys=True, indent=4))
-            #print('\t response : ' + json.dumps(response, sort_keys=True, indent=4))
-        except KeyboardInterrupt:
-            print('\tSUPER MODE')
         
                
     ## Update to Aggregator
     def update(self):
         print('\n')
-        sample = self.blank_sample()
+        if self.DEBUG:
+            sample = self.random_sample()
+        else: 
+            sample = self.blank_sample()
         sensors = self.read_arduino()
         if sensors == None:
             pass
         else:
-            sample.update(sensors)
+            try:
+                sample.update(sensors)
+            except Exception as error:
+                print('\tERROR: ' + str(error))
         microphone_result = self.capture_audio()
         if not microphone_result == None:
             sample.update(microphone_result) 
         self.send_sample(sample)
         response = self.receive_response()
         self.save_data(sample)
-        if self.DEBUG == True:
-            self.extra(sample, response)
   
     ## Render Index
     @cherrypy.expose
