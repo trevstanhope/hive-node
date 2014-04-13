@@ -140,9 +140,9 @@ class HiveNode:
     def send_sample(self, sample):
         print('[Sending Sample]')
         try:
-            dump = json.dumps(sample)
+            dump = json.dumps(sample, indent=4)
             self.socket.send(dump)
-            print('\tOKAY')
+            print(dump)
             return True
         except Exception as error:
             print('\tERROR: ' + str(error))
@@ -184,14 +184,18 @@ class HiveNode:
         
     ## Generate blank sample
     def blank_sample(self):
-        print('[Generating Blank Sample]')
-        sample = {'hive_id' : self.HIVE_ID}
+        print('[Generating BLANK Sample]')
+        sample = {
+            'type' : 'sample',
+            'hive_id' : self.HIVE_ID
+        }
         return sample
     
     ## Generate random sample
     def random_sample(self):
-        print('[Generating Blank Sample]')
+        print('[Generating RANDOM Sample]')
         sample = {
+            'type' : 'sample',
             'hive_id' : self.HIVE_ID,
             'int_t' : random.randint(0,35),
             'ext_t' : random.randint(0,35),
@@ -221,17 +225,12 @@ class HiveNode:
             sample = self.random_sample()
         else: 
             sample = self.blank_sample()
-        sensors = self.read_arduino()
-        if sensors == None:
-            pass
-        else:
-            try:
+            sensors = self.read_arduino()
+            if not sensors == None:
                 sample.update(sensors)
-            except Exception as error:
-                print('\tERROR: ' + str(error))
-        microphone_result = self.capture_audio()
-        if not microphone_result == None:
-            sample.update(microphone_result) 
+            microphone_result = self.capture_audio()
+            if not microphone_result == None:
+                sample.update(microphone_result) 
         self.send_sample(sample)
         response = self.receive_response()
         self.save_data(sample)
