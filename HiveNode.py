@@ -19,6 +19,7 @@ import pyaudio
 import cherrypy
 import numpy as np
 import random
+import urllib2
 from datetime import datetime
 from serial import Serial, SerialException
 from ctypes import *
@@ -135,21 +136,29 @@ class HiveNode:
         except Exception as error:
             print('\tERROR: ' + str(error))
             return None
+    
+    ## Post sample to server
+    def post_sample(self, sample):
+        print('[Posting Sample to Server]')
+        try:
+            dump = json.dumps(sample)
+            req = urllib2.Request(self.POST_URL)
+            req.add_header('Content-Type','application/json')
+            response = urllib2.urlopen(req, dump)
+            print('\tOKAY: ' + dump)
+            return response
+        except Exception as error:
+            print('--> ERROR: ' + str(error))
 
     ## Send sample to aggregator
-    def send_sample(self, sample):
+    def zmq_sample(self, sample):
         print('[Sending Sample]')
         try:
-            dump = json.dumps(sample, indent=4)
+            dump = json.dumps(sample)
             self.socket.send(dump)
-            print(dump)
-            return True
+            print('\tOKAY: ' + dump)
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return False
-    
-    ## Receive response from aggregator
-    def receive_response(self):
         print('[Receiving Response]')
         try:
             socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
@@ -164,10 +173,8 @@ class HiveNode:
                     return None
             else:
                 print('\tERROR: Socket Timeout')
-                return None
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return None
             
     ## Save Data
     def save_data(self, sample):
@@ -231,8 +238,8 @@ class HiveNode:
             microphone_result = self.capture_audio()
             if not microphone_result == None:
                 sample.update(microphone_result) 
-        self.send_sample(sample)
-        response = self.receive_response()
+        self.zmq_sample(sample)
+        self.post_sample(sample)
         self.save_data(sample)
 
     ## Render Index
@@ -250,7 +257,7 @@ if __name__ == '__main__':
 #    cherrypy.config.update({ "environment": "embedded" })
     conf = {
         '/': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')},
-        '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')}, # NEED the '/' before the folder name
-        '/js': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static','js')}, # NEED the '/' before the folder name
+        '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')},
+        '/js': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static','js')},
     }
     cherrypy.quickstart(node, '/', config=conf)
