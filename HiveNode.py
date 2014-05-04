@@ -6,6 +6,7 @@ Hive sensor node based on RaspberryPi and Arduino.
 
 TODO:
 - Authenticate to aggregator?
+- Authenticate to server?
 - Validate data received from Arduino
 """
 
@@ -119,7 +120,7 @@ class HiveNode:
             decibels =  10*np.log10(amplitude)
             self.microphone.stop_stream()
             result = {'db': decibels, 'hz': frequency}
-            print('\t' + str(result))
+            print('\tOKAY' + str(result))
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
@@ -131,7 +132,7 @@ class HiveNode:
         try:
             string = self.arduino.readline()
             result = ast.literal_eval(string)
-            print('\t' + str(result))
+            print('\tOKAY' + str(result))
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
@@ -139,27 +140,25 @@ class HiveNode:
     
     ## Post sample to server
     def post_sample(self, sample):
-        print('[Posting Sample to Server]')
+        print('[Sending Sample to Server]')
         try:
             dump = json.dumps(sample)
             req = urllib2.Request(self.POST_URL)
             req.add_header('Content-Type','application/json')
             response = urllib2.urlopen(req, dump)
-            print('\tOKAY: ' + dump)
+            print('\tOKAY: ' + str(response.getcode()))
             return response
         except Exception as error:
-            print('--> ERROR: ' + str(error))
+            print('\tERROR: ' + str(error))
 
     ## Send sample to aggregator
     def zmq_sample(self, sample):
-        print('[Sending Sample]')
+        print('[Sending Sample to Aggregator]')
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
-            print('\tOKAY: ' + dump)
         except Exception as error:
             print('\tERROR: ' + str(error))
-        print('[Receiving Response]')
         try:
             socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
             if socks:
@@ -196,23 +195,7 @@ class HiveNode:
             'type' : 'sample',
             'hive_id' : self.HIVE_ID
         }
-        return sample
-    
-    ## Generate random sample
-    def random_sample(self):
-        print('[Generating RANDOM Sample]')
-        sample = {
-            'type' : 'sample',
-            'hive_id' : self.HIVE_ID,
-            'int_t' : random.randint(0,35),
-            'ext_t' : random.randint(0,35),
-            'int_h' : random.randint(0,100),
-            'ext_h' : random.randint(0,100),
-            'volts' : random.randint(0,15),
-            'amps'  : random.randint(0,2),
-            'db'    : random.randint(0,200),
-            'hz'    : random.randint(0,4000),
-        }
+        
         return sample
     
     ## Shutdown
@@ -228,16 +211,13 @@ class HiveNode:
     ## Update to Aggregator
     def update(self):
         print('\n')
-        if self.DEBUG:
-            sample = self.random_sample()
-        else: 
-            sample = self.blank_sample()
-            sensors = self.read_arduino()
-            if not sensors == None:
-                sample.update(sensors)
-            microphone_result = self.capture_audio()
-            if not microphone_result == None:
-                sample.update(microphone_result) 
+        sample = self.blank_sample()
+        sensors = self.read_arduino()
+        if not sensors == None:
+            sample.update(sensors)
+        microphone_result = self.capture_audio()
+        if not microphone_result == None:
+            sample.update(microphone_result) 
         self.zmq_sample(sample)
         self.post_sample(sample)
         self.save_data(sample)
@@ -254,7 +234,6 @@ if __name__ == '__main__':
     currdir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.server.socket_host = node.CHERRYPY_ADDR
     cherrypy.server.socket_port = node.CHERRYPY_PORT
-#    cherrypy.config.update({ "environment": "embedded" })
     conf = {
         '/': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'static')},
         '/data': {'tools.staticdir.on':True, 'tools.staticdir.dir':os.path.join(currdir,'data')},
