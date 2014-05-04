@@ -120,7 +120,7 @@ class HiveNode:
             decibels =  10*np.log10(amplitude)
             self.microphone.stop_stream()
             result = {'db': decibels, 'hz': frequency}
-            print('\tOKAY' + str(result))
+            print('\tOKAY: ' + str(result))
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
@@ -132,7 +132,7 @@ class HiveNode:
         try:
             string = self.arduino.readline()
             result = ast.literal_eval(string)
-            print('\tOKAY' + str(result))
+            print('\tOKAY: ' + str(result))
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
