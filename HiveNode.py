@@ -42,27 +42,28 @@ C_ERROR_HANDLER = ERROR_HANDLER_FUNC(py_error_handler)
 # Node
 class HiveNode:
 
-  ## Initialize
+    ## Initialize
     def __init__(self, config):
 
         print('[Loading Config File]')
         with open(config) as config_file:
             settings = json.loads(config_file.read())
-            print('\tsettings : ' + json.dumps(settings, sort_keys=True, indent=4))
             for key in settings:
                 try:
                     getattr(self, key)
                 except AttributeError as error:
+                    print('\t' + key + ' : ' + str(settings[key]))
                     setattr(self, key, settings[key])
                     
         print('[Initializing CSV Logs]')
-        try:
-            for param in self.PARAMS:
+        for param in self.PARAMS:
+            try:
+                open('data/' + param + '.csv', 'a')
+                print('\tUSING EXISTING FILE: ' + param)
+            except Exception:
+                print('\tCREATING NEW FILE: ' + param)
                 with open('data/' + param + '.csv', 'w') as csv_file:
                     csv_file.write('date,val,\n') # no spaces!
-            print('\tOKAY')
-        except Exception as error:
-            print('\t ERROR: ' + str(error))
         
         print('[Initializing ZMQ]')
         try:
@@ -195,7 +196,7 @@ class HiveNode:
             'type' : 'sample',
             'hive_id' : self.HIVE_ID
         }
-        
+        print('\tOKAY')
         return sample
     
     ## Shutdown
@@ -219,7 +220,8 @@ class HiveNode:
         if not microphone_result == None:
             sample.update(microphone_result) 
         self.zmq_sample(sample)
-        self.post_sample(sample)
+        if self.WAN_ENABLED:
+            self.post_sample(sample)
         self.save_data(sample)
 
     ## Render Index
