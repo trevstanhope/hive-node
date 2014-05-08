@@ -116,9 +116,9 @@ class HiveNode:
             wave_array = np.fromstring(data, dtype='int16')
             wave_fft = np.fft.fft(wave_array)
             wave_freqs = np.fft.fftfreq(len(wave_fft))
-            frequency = int(self.RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)]))
+            frequency = round(self.RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)]), 1)
             amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
-            decibels =  int(10*np.log10(amplitude))
+            decibels =  round(10*np.log10(amplitude), 1)
             self.microphone.stop_stream()
             result = {'db': decibels, 'hz': frequency}
             print('\tOKAY: ' + str(result))
