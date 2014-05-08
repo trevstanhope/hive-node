@@ -12,7 +12,7 @@
     "FORMAT": 8,
     "CHERRYPY_PORT": 8081,
     "CHERRYPY_ADDR": "0.0.0.0",
-    "CHERRYPY_INTERVAL": 1,
+    "CHERRYPY_INTERVAL": 0.5,
     "DEBUG":false,
     "PARAMS":["int_t", "ext_t", "int_h","ext_h","volts","amps", "hz","db"]
 }
