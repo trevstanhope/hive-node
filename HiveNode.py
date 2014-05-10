@@ -80,8 +80,10 @@ class HiveNode:
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
             print('\tOKAY')
+            self.ARD_INIT = True
         except Exception as error:
             print('\tERROR: ' + str(error))
+            self.ARD_INIT = str(error)
 
         print('[Initializing Monitor]')
         try:
@@ -104,9 +106,11 @@ class HiveNode:
             )
             self.microphone.stop_stream()
             print('\tOKAY')
+            self.MIC_INIT = True
         except Exception as error:
             print('\tERROR: ' + str(error))
-
+            self.MIC_INIT = str(error)
+            
     ## Capture Audio
     def capture_audio(self):
         print('[Capturing Audio]')
@@ -194,7 +198,9 @@ class HiveNode:
         print('[Generating blank Sample]')
         sample = {
             'type' : 'sample',
-            'hive_id' : self.HIVE_ID
+            'hive_id' : self.HIVE_ID,
+            'mic_init': self.MIC_INIT,
+            'ard_init': self.ARD_INIT
         }
         print('\tOKAY')
         return sample
