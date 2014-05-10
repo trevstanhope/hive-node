@@ -26,6 +26,7 @@ from serial import Serial, SerialException
 from ctypes import *
 from cherrypy.process.plugins import Monitor
 from cherrypy import tools
+import logging
 
 # Constants
 try:
@@ -80,10 +81,8 @@ class HiveNode:
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
             print('\tOKAY')
-            self.ARD_INIT = True
         except Exception as error:
             print('\tERROR: ' + str(error))
-            self.ARD_INIT = str(error)
 
         print('[Initializing Monitor]')
         try:
@@ -106,10 +105,14 @@ class HiveNode:
             )
             self.microphone.stop_stream()
             print('\tOKAY')
-            self.MIC_INIT = True
         except Exception as error:
             print('\tERROR: ' + str(error))
-            self.MIC_INIT = str(error)
+        
+        print('[Initializing Log File]')
+        try:
+            logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
+        except Exception as error:
+            print('\tERROR: ' + str(error))
             
     ## Capture Audio
     def capture_audio(self):
@@ -191,7 +194,7 @@ class HiveNode:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                     print('\tOKAY: ' + param)
                 except Exception as error:
-                    print('\tERROR: ' + str(error)) 
+                    print('\tERROR: ' + str(error))
         
     ## Generate blank sample
     def blank_sample(self):
@@ -199,8 +202,6 @@ class HiveNode:
         sample = {
             'type' : 'sample',
             'hive_id' : self.HIVE_ID,
-            'mic_init': self.MIC_INIT,
-            'ard_init': self.ARD_INIT
         }
         print('\tOKAY')
         return sample

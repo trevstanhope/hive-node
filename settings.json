@@ -16,5 +16,6 @@
     "CHERRYPY_INTERVAL": 0.5,
     "DEBUG":false,
     "SAVE_LOCAL" : false,
+    "LOG_FILE" : "log.txt",
     "PARAMS":["int_t", "ext_t", "int_h","ext_h","volts","amps", "hz","db"]
 }
