@@ -15,5 +15,6 @@
     "CHERRYPY_ADDR": "0.0.0.0",
     "CHERRYPY_INTERVAL": 0.5,
     "DEBUG":false,
+    "SAVE_LOCAL" : false,
     "PARAMS":["int_t", "ext_t", "int_h","ext_h","volts","amps", "hz","db"]
 }

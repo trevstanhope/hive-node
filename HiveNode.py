@@ -78,7 +78,7 @@ class HiveNode:
 
         print('[Initializing Arduino]')
         try:
-            self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD)
+            self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
             print('\tOKAY')
             self.ARD_INIT = True
         except Exception as error:
@@ -226,7 +226,8 @@ class HiveNode:
         self.zmq_sample(sample)
         if self.WAN_ENABLED:
             self.post_sample(sample)
-        self.save_data(sample)
+        if self.SAVE_LOCAL:
+            self.save_data(sample)
 
     ## Render Index
     @cherrypy.expose
