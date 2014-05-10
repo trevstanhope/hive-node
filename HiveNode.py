@@ -125,7 +125,7 @@ class HiveNode:
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return None
+            return {'mic_error': str(error)}
 
     ## Read Arduino
     def read_arduino(self):
@@ -137,7 +137,7 @@ class HiveNode:
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return None
+            return {'ard_error': str(error)}
     
     ## Post sample to server
     def post_sample(self, sample):
@@ -191,7 +191,7 @@ class HiveNode:
         
     ## Generate blank sample
     def blank_sample(self):
-        print('[Generating BLANK Sample]')
+        print('[Generating blank Sample]')
         sample = {
             'type' : 'sample',
             'hive_id' : self.HIVE_ID
@@ -214,11 +214,9 @@ class HiveNode:
         print('\n')
         sample = self.blank_sample()
         sensors = self.read_arduino()
-        if not sensors == None:
-            sample.update(sensors)
+        sample.update(sensors)
         microphone_result = self.capture_audio()
-        if not microphone_result == None:
-            sample.update(microphone_result) 
+        sample.update(microphone_result) 
         self.zmq_sample(sample)
         if self.WAN_ENABLED:
             self.post_sample(sample)
