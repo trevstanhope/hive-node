@@ -1,5 +1,5 @@
 {
-    "HIVE_ID": "hive_1",
+    "HIVE_ID": "hive_2",
     "ZMQ_SERVER": "tcp://127.0.0.1:1980",
     "ZMQ_TIMEOUT": 1000,
     "WAN_ENABLED": false,
@@ -10,7 +10,7 @@
     "RATE": 44100,
     "CHUNK": 1024,
     "FORMAT": 8,
-    "CHERRYPY_PORT": 8081,
+    "CHERRYPY_PORT": 8082,
     "CHERRYPY_ADDR": "0.0.0.0",
     "CHERRYPY_INTERVAL": 1,
     "DEBUG":true,
