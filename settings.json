@@ -6,7 +6,7 @@
     "POST_URL": "http://hivemind.mobi/new",
     "ARDUINO_DEV": "/dev/ttyS0",
     "ARDUINO_BAUD": 9600,
-    "ARDUINO_TIMEOUT" : 1,
+    "ARDUINO_TIMEOUT" : 3,
     "CHANNELS": 1,
     "RATE": 44100,
     "CHUNK": 1024,

@@ -23,8 +23,7 @@ const unsigned int CHARS = 8;
 const unsigned int BUFFER = 128;
 const unsigned int DIGITS = 4;
 const unsigned int PRECISION = 2;
-const unsigned int ON_WAIT = 500;
-const unsigned int OFF_WAIT = 1000;
+const unsigned int WAIT = 2000;
 const unsigned int BOOT_WAIT = 5000;
 const unsigned int PIN_WAIT = 200; // wait for pin to initialize
 const unsigned int SERIAL_WAIT = 1000; // wait for serial connection to start
@@ -80,7 +79,7 @@ void loop() {
   dtostrf(get_amps(), DIGITS, PRECISION, AMPS);
   sprintf(JSON, "{'cycles':%d,'int_t':%s,'ext_t':%s,'int_h':%s,'ext_h':%s,'volts':%s,'amps':%s, 'bars':%s}", CYCLES, INT_TEMPERATURE, EXT_TEMPERATURE, INT_HUMIDITY, EXT_HUMIDITY, VOLTS, AMPS, PASCALS);
   Serial.println(JSON);
-  delay(ON_WAIT);
+  delay(WAIT);
   CYCLES++;
 }
 
