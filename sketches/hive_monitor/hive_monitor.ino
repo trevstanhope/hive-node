@@ -42,6 +42,7 @@ float get_ext_temp(void);
 float get_ext_humidity(void);
 float get_volts(void);
 float get_amps(void);
+float get_pressure(void);
 
 /* --- Objects --- */
 DHT int_dht(DHT_INTERNAL_PIN, DHT_TYPE);
