@@ -8,10 +8,9 @@ sudo apt-get install arduino arduino-mk -y
 sudo apt-get install python-zmq -y
 sudo apt-get install python-serial -y
 sudo apt-get install python-cherrypy3 -y
-
-# Microphone
 sudo apt-get install python-pyaudio -y
 sudo apt-get install python-alsaaudio -y
+sudo apt-get install python-opencv -y
 sudo apt-get install libasound2-dev alsa-utils -y
 
 # Alamode
@@ -25,7 +24,7 @@ sudo cp configs/80-alamode.rules /etc/udev/rules.d
 sudo chown root /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo chgrp root /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo chmod a+s /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
-sudo cp -r libs/DHT /usr/share/arduino/libraries
+sudo cp -r libs/* /usr/share/arduino/libraries
 
 # Connect to local wireless network
 #sudo mv /etc/network/interfaces /etc/network/interfaces.backup

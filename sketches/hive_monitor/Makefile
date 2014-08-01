@@ -14,5 +14,5 @@ ARDUINO_DIR = /usr/share/arduino
 TARGET = HiveMonitor
 BOARD_TAG = alamode # for dev use 'uno'
 ARDUINO_PORT = /dev/ttyS0 # for dev use '/dev/ttyACM0'
-ARDUINO_LIBS = DHT stdio
+ARDUINO_LIBS = DHT stdio Wire Adafruit_BMP085
 include /usr/share/arduino/Arduino.mk
