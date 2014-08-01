@@ -20,7 +20,7 @@
 /* --- Constants --- */
 const unsigned int BAUD = 9600;
 const unsigned int CHARS = 8;
-const unsigned int BUFFER = 128;
+const unsigned int BUFFER = 256;
 const unsigned int DIGITS = 4;
 const unsigned int PRECISION = 2;
 const unsigned int WAIT = 2000;
@@ -77,7 +77,7 @@ void loop() {
   dtostrf(get_pressure(), DIGITS, PRECISION, PASCALS);
   dtostrf(get_volts(), DIGITS, PRECISION, VOLTS);
   dtostrf(get_amps(), DIGITS, PRECISION, AMPS);
-  sprintf(JSON, "{'cycles':%d,'int_t':%s,'ext_t':%s,'int_h':%s,'ext_h':%s,'volts':%s,'amps':%s, 'bars':%s}", CYCLES, INT_TEMPERATURE, EXT_TEMPERATURE, INT_HUMIDITY, EXT_HUMIDITY, VOLTS, AMPS, PASCALS);
+  sprintf(JSON, "{'cycles':%d,'int_t':%s,'ext_t':%s,'int_h':%s,'ext_h':%s,'volts':%s,'amps':%s,'bars':%s}", CYCLES, INT_TEMPERATURE, EXT_TEMPERATURE, INT_HUMIDITY, EXT_HUMIDITY, VOLTS, AMPS, PASCALS);
   Serial.println(JSON);
   delay(WAIT);
   CYCLES++;
