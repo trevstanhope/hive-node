@@ -25,6 +25,7 @@ sudo chown root /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo chgrp root /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo chmod a+s /usr/bin/avrdude /usr/share/arduino/hardware/tools/avrdude
 sudo cp -r libs/* /usr/share/arduino/libraries
+sudo cp /usr/share/arduino/libraries/Wire/utility/* /usr/share/arduino/libraries/Wire/
 
 # Connect to local wireless network
 #sudo mv /etc/network/interfaces /etc/network/interfaces.backup

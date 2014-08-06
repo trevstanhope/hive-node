@@ -27,6 +27,7 @@ from ctypes import *
 from cherrypy.process.plugins import Monitor
 from cherrypy import tools
 import logging
+import socket
 
 # Constants
 try:
@@ -198,7 +199,7 @@ class HiveNode:
         
     ## Generate blank sample
     def blank_sample(self):
-        print('[Generating blank Sample]')
+        print('[Generating Blank Sample]')
         sample = {
             'type' : 'sample',
             'hive_id' : self.HIVE_ID,
