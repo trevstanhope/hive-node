@@ -11,10 +11,10 @@
 #include <DHT.h>
 
 /* --- Definitions --- */
-#define DHT_INTERNAL_PIN 4
-#define DHT_EXTERNAL_PIN 5
-#define VOLTS_PIN A0
-#define AMPS_PIN A1
+#define DHT_INTERNAL_PIN A0
+#define DHT_EXTERNAL_PIN A1
+#define VOLTS_PIN A2
+#define AMPS_PIN A3
 #define DHT_TYPE DHT22
 
 /* --- Constants --- */
