@@ -23,6 +23,8 @@ const unsigned int CHARS = 8;
 const unsigned int BUFFER = 256;
 const unsigned int DIGITS = 4;
 const unsigned int PRECISION = 2;
+const unsigned int PASCALS_DIGITS = 6;
+const unsigned int PASCALS_PRECISION = 0;
 const unsigned int CYCLE_WAIT = 2000;
 const unsigned int BOOT_WAIT = 5000;
 const unsigned int PIN_WAIT = 200; // wait for pin to initialize
@@ -74,7 +76,7 @@ void loop() {
   dtostrf(get_ext_humidity(), DIGITS, PRECISION, EXT_HUMIDITY);
   dtostrf(get_int_temp(), DIGITS, PRECISION, INT_TEMPERATURE);
   dtostrf(get_int_humidity(), DIGITS, PRECISION, INT_HUMIDITY);
-  dtostrf(get_pressure(), DIGITS, PRECISION, PASCALS);
+  dtostrf(get_pressure(), PASCALS_DIGITS, PASCALS_PRECISION, PASCALS);
   dtostrf(get_volts(), DIGITS, PRECISION, VOLTS);
   dtostrf(get_amps(), DIGITS, PRECISION, AMPS);
   sprintf(JSON, "{'cycles':%ld,'int_t':%s,'ext_t':%s,'int_h':%s,'ext_h':%s,'volts':%s,'amps':%s,'pa':%s}", CYCLES, INT_TEMPERATURE, EXT_TEMPERATURE, INT_HUMIDITY, EXT_HUMIDITY, VOLTS, AMPS, PASCALS);

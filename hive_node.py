@@ -227,7 +227,7 @@ class HiveNode:
         sensors = self.read_arduino()
         sample.update(sensors)
         microphone_result = self.capture_audio()
-        sample.update(microphone_result) 
+        sample.update(microphone_result)
         self.zmq_sample(sample)
         if self.WAN_ENABLED:
             self.post_sample(sample)
