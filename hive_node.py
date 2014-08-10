@@ -46,7 +46,10 @@ class HiveNode:
 
     ## Initialize
     def __init__(self, config):
-
+		
+        print('[Setting Configuration]')
+        self.HIVE_ID = socket.gethostname()
+        
         print('[Loading Config File]')
         with open(config) as config_file:
             settings = json.loads(config_file.read())

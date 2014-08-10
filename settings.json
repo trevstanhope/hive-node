@@ -1,5 +1,4 @@
 {
-    "HIVE_ID": "hive_1",
     "ZMQ_SERVER": "tcp://192.168.0.199:1980",
     "ZMQ_TIMEOUT": 1000,
     "WAN_ENABLED": false,
@@ -17,5 +16,5 @@
     "DEBUG":false,
     "SAVE_LOCAL" : false,
     "LOG_FILE" : "log.txt",
-    "PARAMS":["int_t", "ext_t", "int_h","ext_h","volts","amps", "hz","db"]
+    "PARAMS":["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
 }

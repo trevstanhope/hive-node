@@ -77,7 +77,7 @@ void loop() {
   dtostrf(get_pressure(), DIGITS, PRECISION, PASCALS);
   dtostrf(get_volts(), DIGITS, PRECISION, VOLTS);
   dtostrf(get_amps(), DIGITS, PRECISION, AMPS);
-  sprintf(JSON, "{'cycles':%ld,'int_t':%s,'ext_t':%s,'int_h':%s,'ext_h':%s,'volts':%s,'amps':%s,'bars':%s}", CYCLES, INT_TEMPERATURE, EXT_TEMPERATURE, INT_HUMIDITY, EXT_HUMIDITY, VOLTS, AMPS, PASCALS);
+  sprintf(JSON, "{'cycles':%ld,'int_t':%s,'ext_t':%s,'int_h':%s,'ext_h':%s,'volts':%s,'amps':%s,'pa':%s}", CYCLES, INT_TEMPERATURE, EXT_TEMPERATURE, INT_HUMIDITY, EXT_HUMIDITY, VOLTS, AMPS, PASCALS);
   Serial.println(JSON);
   delay(CYCLE_WAIT);
   CYCLES++;
