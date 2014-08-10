@@ -136,7 +136,6 @@ class HiveNode:
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return {'mic_error': str(error)}
 
     ## Read Arduino
     def read_arduino(self):
@@ -148,7 +147,6 @@ class HiveNode:
             return result
         except Exception as error:
             print('\tERROR: ' + str(error))
-            return {'ard_error': str(error)}
     
     ## Post sample to server
     def post_sample(self, sample):
@@ -203,10 +201,9 @@ class HiveNode:
     ## Generate blank sample
     def blank_sample(self):
         print('[Generating Blank Sample]')
-        sample = {
-            'type' : 'sample',
-            'hive_id' : self.HIVE_ID,
-        }
+        sample = dict(zip(self.PARAMS, [0] * len(self.PARAMS)))
+        sample['type'] = 'sample'
+        sample['hive_id'] = self.HIVE_ID
         print('\tOKAY')
         return sample
     
