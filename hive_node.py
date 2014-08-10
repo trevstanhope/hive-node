@@ -8,6 +8,7 @@ TODO:
 - Authenticate to aggregator?
 - Authenticate to server?
 - Validate data received from Arduino
+- Add computer vision components
 """
 
 # Libraries
@@ -60,6 +61,13 @@ class HiveNode:
                     print('\t' + key + ' : ' + str(settings[key]))
                     setattr(self, key, settings[key])
         
+        print('[Initializing Monitor]')
+        try:
+            Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
+            print('\tOKAY')
+        except Exception as error:
+            print('\tERROR: %s' % str(error))
+        
         if self.CSV_ENABLED:      
 			print('[Initializing CSV Logs]')
 			for param in self.PARAMS:
@@ -82,13 +90,6 @@ class HiveNode:
 				print('\tOKAY')
 			except Exception as error:
 				print('\tERROR: %s' % str(error))
-
-        print('[Initializing Monitor]')
-        try:
-            Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
-            print('\tOKAY')
-        except Exception as error:
-            print('\tERROR: %s' % str(error))
         
         if self.LOG_ENABLED:
 			print('[Initializing Log File]')
@@ -193,7 +194,7 @@ class HiveNode:
             print('\tERROR: %s' % str(error))
             
     ## Save Data
-    def save_data(self, sample):
+    def save_sample(self, sample):
         print('[Saving Data to File]')
         if sample:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
@@ -244,7 +245,7 @@ class HiveNode:
         if self.WAN_ENABLED:
             self.post_sample(sample)
         if self.CSV_ENABLED:
-            self.save_data(sample)
+            self.save_sample(sample)
 
     ## Render Index
     @cherrypy.expose
