@@ -28,12 +28,11 @@ sudo cp -r libs/* /usr/share/arduino/libraries
 sudo cp /usr/share/arduino/libraries/Wire/utility/* /usr/share/arduino/libraries/Wire/
 
 # Connect to local wireless network
-#sudo mv /etc/network/interfaces /etc/network/interfaces.backup
-#sudo cp configs/interfaces /etc/network
+sudo cp configs/interfaces /etc/network
 
 # Apache2 port-forward 8081 to 80
 #sudo cp configs/HiveMind /etc/apache2/sites-available/
 #sudo a2ensite HiveMind
 
 # Start on boot
-#sudo cp configs/rc.local /etc/
+sudo cp configs/rc.local /etc/

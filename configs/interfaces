@@ -8,5 +8,5 @@ iface eth0 inet dhcp
 # wlan0
 auto wlan0
 iface wlan0 inet dhcp
-  wpa-ssid hivemind
-  wpa-psk password
+  wpa-ssid MacRobotics
+  wpa-psk Pa$$w0rd
