@@ -1,0 +1,3 @@
+#!/bin/sh
+cd /usr/share/hive-node
+python hive_node.py
