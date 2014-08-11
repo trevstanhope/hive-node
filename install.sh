@@ -37,5 +37,5 @@ sudo cp configs/interfaces /etc/network
 # Start on boot
 sudo cp -R ../hive-node /usr/share/
 sudo ln -s /usr/share/hive-node/bin/hive-node /usr/bin
-chmod +x /usr/bin/hive-node
+chmod +x /usr/share/hive-node/bin/hive-node
 sudo cp configs/rc.local /etc/
