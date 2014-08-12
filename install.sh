@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Dependencies
+echo "Installing dependencies ..."
 sudo apt-get update -y
 sudo apt-get upgrade -y
 sudo apt-get install python -y
@@ -14,6 +15,7 @@ sudo apt-get install python-opencv -y
 sudo apt-get install libasound2-dev alsa-utils -y
 
 # Alamode
+echo "Setting up Arduino ..."
 sudo cp configs/avrdude /usr/bin/avrdude
 sudo cp configs/avrdude /usr/share/arduino/hardware/tools
 sudo cp configs/avrdude.conf  /usr/share/arduino/hardware/tools
@@ -28,14 +30,15 @@ sudo cp -r libs/* /usr/share/arduino/libraries
 sudo cp /usr/share/arduino/libraries/Wire/utility/* /usr/share/arduino/libraries/Wire/
 
 # Connect to local wireless network
+echo "Setting up network configuration ..."
 sudo cp configs/interfaces /etc/network
 
-# Apache2 port-forward 8081 to 80
-#sudo cp configs/HiveMind /etc/apache2/sites-available/
-#sudo a2ensite HiveMind
+# Install to path
+echo "Installing to /usr/share ..."
+sudo cp -R ../hive-node /usr/share/
+sudo ln -sf /usr/share/hive-node/bin/hive-node /usr/bin
+sudo chmod +x /usr/share/hive-node/bin/hive-node
 
 # Start on boot
-sudo cp -R ../hive-node /usr/share/
-sudo ln -s /usr/share/hive-node/bin/hive-node /usr/bin
-sudo chmod +x /usr/share/hive-node/bin/hive-node
+echo "Setting up start on boot ..."
 sudo cp configs/rc.local /etc/
