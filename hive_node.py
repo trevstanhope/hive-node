@@ -215,7 +215,7 @@ class HiveNode:
     
     ## Shutdown
     def shutdown(self):
-        print('[Shutting Down]')
+		print('[Shutting Down]')
 		if self.ARDUINO_ENABLED:
 			self.arduino.close()
 		if self.MICROPHONE_ENABLED:
