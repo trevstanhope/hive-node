@@ -175,9 +175,6 @@ class HiveNode:
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
-        except Exception as error:
-            print('\tERROR: %s' % str(error))
-        try:
             socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
             if socks:
                 if socks.get(self.socket) == zmq.POLLIN:
@@ -192,6 +189,7 @@ class HiveNode:
                 print('\tERROR: Socket Timeout')
         except Exception as error:
             print('\tERROR: %s' % str(error))
+			raise
             
     ## Save Data
     def save_sample(self, sample):
@@ -223,7 +221,9 @@ class HiveNode:
 				self.arduino.close()
 			if self.MICROPHONE_ENABLED:
 				self.microphone.close()
-			sys.exit() 
+			if self.CAMERA_ENABLED:
+				self.camera.release()
+			os.system("sudo reboot")
         except Exception as error:
             print('\tERROR: %s' % str(error))
             
@@ -241,7 +241,10 @@ class HiveNode:
 			camera_result = self.capture_video()
 			sample.update(camera_result)
         if self.ZMQ_ENABLED:
-            self.zmq_sample(sample)
+			try:
+				self.zmq_sample(sample)
+			except:
+				self.shutdown()
         if self.WAN_ENABLED:
             self.post_sample(sample)
         if self.CSV_ENABLED:
