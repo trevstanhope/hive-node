@@ -189,7 +189,7 @@ class HiveNode:
                 print('\tERROR: Socket Timeout')
         except Exception as error:
             print('\tERROR: %s' % str(error))
-			raise
+            raise
             
     ## Save Data
     def save_sample(self, sample):
