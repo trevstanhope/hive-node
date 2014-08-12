@@ -216,16 +216,13 @@ class HiveNode:
     ## Shutdown
     def shutdown(self):
         print('[Shutting Down]')
-        try:
-			if self.ARDUINO_ENABLED:
-				self.arduino.close()
-			if self.MICROPHONE_ENABLED:
-				self.microphone.close()
-			if self.CAMERA_ENABLED:
-				self.camera.release()
-			os.system("sudo reboot")
-        except Exception as error:
-            print('\tERROR: %s' % str(error))
+		if self.ARDUINO_ENABLED:
+			self.arduino.close()
+		if self.MICROPHONE_ENABLED:
+			self.microphone.close()
+		if self.CAMERA_ENABLED:
+			self.camera.release()
+		os.system("sudo reboot")
             
     ## Update to Aggregator
     def update(self):
