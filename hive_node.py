@@ -217,11 +217,20 @@ class HiveNode:
     def shutdown(self):
 		print('[Shutting Down]')
 		if self.ARDUINO_ENABLED:
-			self.arduino.close()
+			try:
+				self.arduino.close()
+			except:
+				pass
 		if self.MICROPHONE_ENABLED:
-			self.microphone.close()
+			try:
+				self.microphone.close()
+			except:
+				pass
 		if self.CAMERA_ENABLED:
-			self.camera.release()
+			try:
+				self.camera.release()
+			except:
+				pass
 		os.system("sudo reboot")
             
     ## Update to Aggregator
