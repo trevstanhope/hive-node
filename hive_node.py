@@ -129,11 +129,11 @@ class HiveNode:
         print('[Capturing Audio]')
         try:
             self.microphone.start_stream()
-            data = self.microphone.read(self.CHUNK)
+            data = self.microphone.read(self.MICROPHONE_CHUNK)
             wave_array = np.fromstring(data, dtype='int16')
             wave_fft = np.fft.fft(wave_array)
             wave_freqs = np.fft.fftfreq(len(wave_fft))
-            frequency = round(self.RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)]), 1)
+            frequency = round(self.MICROPHONE_RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)]), 1)
             amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
             decibels =  round(10*np.log10(amplitude), 1)
             self.microphone.stop_stream()
