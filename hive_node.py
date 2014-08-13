@@ -175,12 +175,13 @@ class HiveNode:
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
+            print('\tOKAY: %s' % str(dump))
             socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
             if socks:
                 if socks.get(self.socket) == zmq.POLLIN:
                     dump = self.socket.recv(zmq.NOBLOCK)
                     response = json.loads(dump)
-                    print('\tOKAY: ' + str(response))
+                    print('\tOKAY: %s' % str(response))
                     return response
                 else:
                     print('\tERROR: Poll Timeout')
