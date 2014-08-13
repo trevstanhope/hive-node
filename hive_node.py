@@ -143,6 +143,17 @@ class HiveNode:
 			result = {'microphone_error': str(error)}
 			print('\tERROR: %s' % str(error))
         return result
+    
+    ## Capture Video
+    def capture_video(self):
+        print('[Capturing Video]')
+        try:
+            result = {'db': decibels, 'hz': frequency}
+            print('\tOKAY: %s' % str(result))
+        except Exception as error:
+			result = {'camera_error': str(error)}
+			print('\tERROR: %s' % str(error))
+        return result
 
     ## Read Arduino
     def read_arduino(self):
