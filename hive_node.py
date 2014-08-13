@@ -259,10 +259,15 @@ class HiveNode:
 			camera_result = self.capture_video()
 			sample.update(camera_result)
         if self.ZMQ_ENABLED:
+			# Try once
 			try:
 				self.zmq_sample(sample)
 			except:
-				self.shutdown()
+				# Try again
+				try:
+					self.zmq_sample(sample)
+				except:
+					self.shutdown()
         if self.WAN_ENABLED:
             self.post_sample(sample)
         if self.CSV_ENABLED:
