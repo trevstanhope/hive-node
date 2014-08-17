@@ -130,14 +130,22 @@ class HiveNode:
         try:
             self.microphone.start_stream()
             data = self.microphone.read(self.MICROPHONE_CHUNK)
+            self.microphone.stop_stream()
             wave_array = np.fromstring(data, dtype='int16')
             wave_fft = np.fft.fft(wave_array)
             wave_freqs = np.fft.fftfreq(len(wave_fft))
-            frequency = round(self.MICROPHONE_RATE*abs(wave_freqs[np.argmax(np.abs(wave_fft)**2)]), 1)
-            amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
-            decibels =  round(10*np.log10(amplitude), 1)
-            self.microphone.stop_stream()
-            result = {'db': decibels, 'hz': frequency}
+            dominant_peak = np.argmax(np.abs(wave_fft))
+            dominant_hertz = self.MICROPHONE_RATE*abs(wave_freqs[dominant_peak])
+            dominant_amplitude = np.sqrt(np.abs(wave_fft[dominant_peak])**2)
+            dominant_decibels = 10*np.log10(dominant_amplitude)
+            rms_amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
+            rms_decibels =  10*np.log10(rms_amplitude)
+            sorted_peaks = np.argsort(np.abs(wave_fft))
+            sorted_hertz = self.MICROPHONE_RATE*abs(wave_freqs[sorted_peaks])
+            result = {
+                'db' : rms_decibels,
+                'hz' : dominant_hertz,
+                }
             print('\tOKAY: %s' % str(result))
         except Exception as error:
 			result = {'microphone_error': str(error)}
@@ -148,7 +156,7 @@ class HiveNode:
     def capture_video(self):
         print('[Capturing Video]')
         try:
-            result = {'db': decibels, 'hz': frequency}
+            result = {'bees': bees}
             print('\tOKAY: %s' % str(result))
         except Exception as error:
 			result = {'camera_error': str(error)}
@@ -186,7 +194,6 @@ class HiveNode:
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
-            print('\tOKAY: %s' % str(dump))
             socks = dict(self.poller.poll(self.ZMQ_TIMEOUT))
             if socks:
                 if socks.get(self.socket) == zmq.POLLIN:
@@ -219,10 +226,12 @@ class HiveNode:
     ## Generate blank sample
     def blank_sample(self):
         print('[Generating Blank Sample]')
-        sample = dict(zip(self.PARAMS, [0] * len(self.PARAMS)))
-        sample['type'] = 'sample'
-        sample['hive_id'] = self.HIVE_ID
-        print('\tOKAY')
+        sample = {
+            'type' : 'sample',
+            'fake_time' : datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'),
+            'hive_id' : self.HIVE_ID
+            }
+        print('\tOKAY: %s' % str(sample))
         return sample
     
     ## Shutdown
