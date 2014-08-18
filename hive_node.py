@@ -272,7 +272,8 @@ class HiveNode:
 			try:
 				self.zmq_sample(sample)
 			except:
-				self.shutdown()
+				if self.REBOOT_ENABLED:
+					self.shutdown()
         if self.WAN_ENABLED:
             self.post_sample(sample)
         if self.CSV_ENABLED:

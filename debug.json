@@ -1,4 +1,5 @@
 {
+    "REBOOT_ENABLED": false,
     "ZMQ_ENABLED": true,
     "ZMQ_SERVER": "tcp://127.0.0.1:1980",
     "ZMQ_TIMEOUT": 5000,
