@@ -58,7 +58,7 @@ then
 echo "Installing to /usr/share ..."
 sudo cp -R ../hive-node /usr/share/
 sudo ln -sf /usr/share/hive-node/bin/hive-node /usr/bin
-sudo chmod +x /usr/share/hive-node/bin/hive-nodefi
+sudo chmod +x /usr/share/hive-node/bin/hive-node
 fi
 if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
 then
