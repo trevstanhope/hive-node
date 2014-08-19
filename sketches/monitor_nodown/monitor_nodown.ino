@@ -15,7 +15,8 @@
 #define DHT_EXTERNAL_PIN A1
 #define VOLTS_PIN A2
 #define AMPS_PIN A3
-#define DHT_TYPE DHT22
+#define DHT_INTERNAL_TYPE DHT22
+#define DHT_EXTERNAL_TYPE DHT11
 
 /* --- Constants --- */
 const unsigned int BAUD = 9600;
@@ -38,8 +39,8 @@ float get_amps(void);
 float get_pressure(void);
 
 /* --- Objects --- */
-DHT int_dht(DHT_INTERNAL_PIN, DHT_TYPE);
-DHT ext_dht(DHT_EXTERNAL_PIN, DHT_TYPE);
+DHT int_dht(DHT_INTERNAL_PIN, DHT_INTERNAL_TYPE);
+DHT ext_dht(DHT_EXTERNAL_PIN, DHT_EXTERNAL_TYPE);
 Adafruit_BMP085 bmp;
 
 /* --- Variables --- */
