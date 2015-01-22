@@ -17,7 +17,10 @@ import ast
 import json
 import os
 import sys
-import pyaudio
+try:
+    import pyaudio
+except Exception:
+    pass
 import cherrypy
 import numpy as np
 import random
@@ -34,7 +37,7 @@ import socket
 try:
     CONFIG_FILE = sys.argv[1]
 except Exception as err:
-    CONFIG_FILE = 'settings.json'
+    CONFIG_FILE = None
 
 # Error Handling
 ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
@@ -47,11 +50,49 @@ class HiveNode:
 
     ## Initialize
     def __init__(self, config):
-		
-        print('[Setting Configuration]')
-        self.HIVE_ID = socket.gethostname()
         
-        print('[Loading Config File]')
+        # Configuration
+        if not config:
+            self.REBOOT_ENABLED = False
+            self.ZMQ_ENABLED = True
+            self.ZMQ_SERVER = "tcp://192.168.0.199:1980"
+            self.ZMQ_TIMEOUT = 5000
+            self.WAN_ENABLED = False
+            self.WAN_URL = "http://hivemind.mobi/new"
+            self.ARDUINO_ENABLED = True
+            self.ARDUINO_DEV = "/dev/ttyS0"
+            self.ARDUINO_BAUD = 9600
+            self.ARDUINO_TIMEOUT = 3
+            self.MICROPHONE_ENABLED = True
+            self.MICROPHONE_CHANNELS = 1
+            self.MICROPHONE_RATE = 44100
+            self.MICROPHONE_CHUNK = 4096
+            self.MICROPHONE_FORMAT = 8
+            self.CAMERA_ENABLED = False
+            self.CHERRYPY_PORT = 8081
+            self.CHERRYPY_ADDR ="0.0.0.0"
+            self.CHERRYPY_INTERVAL = 0.5
+            self.CSV_ENABLED = False
+            self.LOG_ENABLED = True
+            self.LOG_FILE = "log.txt"
+            self.PARAMS = ["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
+            self.HIVE_ID = socket.gethostname()
+            self.log_msg('Setting Default Configuration', 'OK')
+        else:
+            self.load_config(config)
+
+        # Initializers
+        self.init_tasks()
+        self.init_csv()
+        self.init_zmq()
+        self.init_logging()
+        self.init_arduino()
+        self.init_mic()
+        self.init_cam()
+    
+    ## Load Config File
+    def load_config(self, config):
+        self.log_msg('Loading Config File', 'OK')
         with open(config) as config_file:
             settings = json.loads(config_file.read())
             for key in settings:
@@ -60,16 +101,20 @@ class HiveNode:
                 except AttributeError as error:
                     print('\t' + key + ' : ' + str(settings[key]))
                     setattr(self, key, settings[key])
-        
-        print('[Initializing Monitor]')
+        self.log_msg('Loading Config File', 'OK')
+                    
+    ## Initialize tasks
+    def init_tasks(self):    
         try:
             Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
-            print('\tOKAY')
+            msg = 'OKAY'
         except Exception as error:
-            print('\tERROR: %s' % str(error))
-        
-        if self.CSV_ENABLED:      
-			print('[Initializing CSV Logs]')
+            msg = 'ERROR : %s' % str(error)
+        self.log_msg('Initializing Tasks', msg)
+    
+    ## Initialize CSV backups
+    def init_csv(self):
+        if self.CSV_ENABLED:
 			for param in self.PARAMS:
 				try:
 					open('data/' + param + '.csv', 'a')
@@ -78,36 +123,45 @@ class HiveNode:
 					print('\tCREATING NEW FILE: ' + param)
 					with open('data/' + param + '.csv', 'w') as csv_file:
 						csv_file.write('date,val,\n') # no spaces!
-        
+			self.log_msg('Initializing CSV Logs', 'OK')
+                        
+    ## Initialize ZMQ messenger                    
+    def init_zmq(self):
         if self.ZMQ_ENABLED:
-			print('[Initializing ZMQ]')
 			try:
 				self.context = zmq.Context()
 				self.socket = self.context.socket(zmq.REQ)
 				self.socket.connect(self.ZMQ_SERVER)
 				self.poller = zmq.Poller()
 				self.poller.register(self.socket, zmq.POLLIN)
-				print('\tOKAY')
+				msg = 'OKAY'
 			except Exception as error:
-				print('\tERROR: %s' % str(error))
-        
+				msg = 'ERROR : %s' % str(error)
+			self.log_msg('Initializing ZMQ', msg)
+    
+    ## Initialize Logging
+    def init_logging(self):    
         if self.LOG_ENABLED:
-			print('[Initializing Log File]')
 			try:
 				logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
+				msg = 'OK'
 			except Exception as error:
-				print('\tERROR: %s' % str(error))
-            
+				msg = 'ERROR : %s' % str(error)
+			self.log_msg('Initializing Log File', msg)
+    
+    ## Initialize Arduino
+    def init_arduino(self):        
         if self.ARDUINO_ENABLED:
-			print('[Initializing Arduino]')
 			try:
 				self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
-				print('\tOKAY')
+				msg = 'OK'
 			except Exception as error:
-				print('\tERROR: %s' % str(error))
-        
+				msg = '\tERROR : %s' % str(error)
+			self.log_msg('Initializing Arduino', msg)
+    
+    ## Initialize Microphone    
+    def init_mic(self):
         if self.MICROPHONE_ENABLED:
-			print('[Initializing Microphone]')
 			try:
 				asound = cdll.LoadLibrary('libasound.so')
 				asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
@@ -120,13 +174,18 @@ class HiveNode:
 					frames_per_buffer=self.MICROPHONE_CHUNK
 				)
 				self.microphone.stop_stream()
-				print('\tOKAY')
+				msg = 'OK'
 			except Exception as error:
-				print('\tERROR: %s' % str(error))
-            
+				msg = 'ERROR : %s' % str(error)
+			self.log_msg('Initializing Microphone', msg)
+    
+    ## Initialize camera
+    def init_cam(self):
+        if self.CAMERA_ENABLED:
+            self.log_msg('Initializing Microphone', 'OK')
+
     ## Capture Audio
     def capture_audio(self):
-        print('[Capturing Audio]')
         try:
             self.microphone.start_stream()
             data = self.microphone.read(self.MICROPHONE_CHUNK)
@@ -146,51 +205,51 @@ class HiveNode:
                 'db' : rms_decibels,
                 'hz' : dominant_hertz,
                 }
-            print('\tOKAY: %s' % str(result))
+            msg = 'OKAY: %s' % str(result)
         except Exception as error:
-			result = {'microphone_error': str(error)}
-			print('\tERROR: %s' % str(error))
+             result = {'microphone_error': str(error)}
+             msg = 'ERROR : %s' % str(error)
+        self.log_msg('Capturing Audio', msg)
         return result
     
     ## Capture Video
     def capture_video(self):
-        print('[Capturing Video]')
         try:
             result = {'bees': bees}
             print('\tOKAY: %s' % str(result))
         except Exception as error:
 			result = {'camera_error': str(error)}
-			print('\tERROR: %s' % str(error))
+			print('\tERROR : %s' % str(error))
+        self.log_msg('Capturing Video', 'OK')
         return result
 
     ## Read Arduino
     def read_arduino(self):
-        print('[Reading Arduino]')
         try:
             string = self.arduino.readline()
             result = ast.literal_eval(string)
-            print('\tOKAY: %s' % str(result))
+            msg = 'OK : %s' % str(result)
         except Exception as error:
 			result = {'arduino_error' : str(error)}
-			print('\tERROR: %s' % str(error))
+			msg = 'ERROR : %s' % str(error)
+        self.log_msg('Reading Arduino', msg)
         return result
     
     ## Post sample to server
     def post_sample(self, sample):
-        print('[Sending Sample to Server]')
         try:
             dump = json.dumps(sample)
             req = urllib2.Request(self.WAN_URL)
             req.add_header('Content-Type','application/json')
             response = urllib2.urlopen(req, dump)
-            print('\tOKAY: %s' % str(response.getcode()))
+            msg = 'OK : %s' % str(response.getcode())
             return response
         except Exception as error:
-            print('\tERROR: %s' % str(error))
+            msg = 'ERROR : %s' % str(error)
+        self.log_msg('Sending to Server', msg)
 
     ## Send sample to aggregator
     def zmq_sample(self, sample):
-        print('[Sending Sample to Aggregator]')
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
@@ -199,20 +258,20 @@ class HiveNode:
                 if socks.get(self.socket) == zmq.POLLIN:
                     dump = self.socket.recv(zmq.NOBLOCK)
                     response = json.loads(dump)
-                    print('\tOKAY: %s' % str(response))
-                    return response
+                    msg = 'OKAY : %s' % str(response)
+                    result = response
                 else:
-                    print('\tERROR: Poll Timeout')
-                    return None
+                    msg = 'ERROR : Poll Timeout'
+                    result = None
             else:
-                print('\tERROR: Socket Timeout')
+                msg = 'ERROR : Socket Timeout'
         except Exception as error:
-            print('\tERROR: %s' % str(error))
-            raise
+            msg = 'ERROR : %s' % str(error)
+        self.log_msg('Sending to Aggregator', msg)
+        return result
             
     ## Save Data
     def save_sample(self, sample):
-        print('[Saving Data to File]')
         if sample:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             for param in self.PARAMS:
@@ -222,21 +281,39 @@ class HiveNode:
                     print('\tOKAY: ' + param)
                 except Exception as error:
                     print('\tERROR: %s' % str(error))
+        self.log_msg('Saving Data to File', 'OK')
         
     ## Generate blank sample
     def blank_sample(self):
-        print('[Generating Blank Sample]')
         sample = {
             'type' : 'sample',
             'fake_time' : datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'),
             'hive_id' : self.HIVE_ID
             }
-        print('\tOKAY: %s' % str(sample))
+        self.log_msg('Generating Blank Sample', 'OK')
         return sample
+    
+    ## Load Config File
+    def load_config(self, config):
+        self.log_msg('Loading Config File')
+        with open(config) as config_file:
+            settings = json.loads(config_file.read())
+            for key in settings:
+                try:
+                    getattr(self, key)
+                except AttributeError as error:
+                    print('\t' + key + ' : ' + str(settings[key]))
+                    setattr(self, key, settings[key])
+        self.log_msg('Loading Config File', 'OK')
+                    
+    ## Log Message
+    def log_msg(self, task, msg):
+        t = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
+        print('%s [%s] %s' % (t, task, msg))
     
     ## Shutdown
     def shutdown(self):
-		print('[Shutting Down]')
+		self.log_msg('Shutting Down')
 		if self.ARDUINO_ENABLED:
 			try:
 				self.arduino.close()
@@ -252,7 +329,8 @@ class HiveNode:
 				self.camera.release()
 			except:
 				pass
-		os.system("sudo reboot")
+		if self.REBOOT_ENABLED:
+				os.system("sudo reboot")
             
     ## Update to Aggregator
     def update(self):
