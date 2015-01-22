@@ -71,7 +71,7 @@ class HiveNode:
             self.CAMERA_ENABLED = False
             self.CHERRYPY_PORT = 8081
             self.CHERRYPY_ADDR ="0.0.0.0"
-            self.CHERRYPY_INTERVAL = 0.5
+            self.PING_INTERVAL = 30
             self.CSV_ENABLED = False
             self.LOG_ENABLED = True
             self.LOG_FILE = "log.txt"
@@ -106,8 +106,8 @@ class HiveNode:
     ## Initialize tasks
     def init_tasks(self):    
         try:
-            Monitor(cherrypy.engine, self.update, frequency=self.CHERRYPY_INTERVAL).subscribe()
-            msg = 'OKAY'
+            Monitor(cherrypy.engine, self.update, frequency=self.PING_INTERVAL).subscribe()
+            msg = 'OK'
         except Exception as error:
             msg = 'ERROR : %s' % str(error)
         self.log_msg('Initializing Tasks', msg)
@@ -134,7 +134,7 @@ class HiveNode:
 				self.socket.connect(self.ZMQ_SERVER)
 				self.poller = zmq.Poller()
 				self.poller.register(self.socket, zmq.POLLIN)
-				msg = 'OKAY'
+				msg = 'OK'
 			except Exception as error:
 				msg = 'ERROR : %s' % str(error)
 			self.log_msg('Initializing ZMQ', msg)
@@ -205,7 +205,7 @@ class HiveNode:
                 'db' : rms_decibels,
                 'hz' : dominant_hertz,
                 }
-            msg = 'OKAY: %s' % str(result)
+            msg = 'OK : %s' % str(result)
         except Exception as error:
              result = {'microphone_error': str(error)}
              msg = 'ERROR : %s' % str(error)
@@ -305,7 +305,12 @@ class HiveNode:
                     print('\t' + key + ' : ' + str(settings[key]))
                     setattr(self, key, settings[key])
         self.log_msg('Loading Config File', 'OK')
-                    
+
+    ## Update Clock
+    def update_clock(self, secs):
+        self.TIME_ERROR = time.time() - secs
+        self.log_msg('Updated Clock', 'dt=%d' % secs)
+
     ## Log Message
     def log_msg(self, task, msg):
         t = datetime.strftime(datetime.now(), "%Y%m%d%H%M%S")
@@ -334,7 +339,6 @@ class HiveNode:
             
     ## Update to Aggregator
     def update(self):
-        print('\n')
         sample = self.blank_sample()
         if self.ARDUINO_ENABLED:
 			arduino_result = self.read_arduino()
@@ -346,9 +350,13 @@ class HiveNode:
 			camera_result = self.capture_video()
 			sample.update(camera_result)
         if self.ZMQ_ENABLED:
-			# Try once
 			try:
-				self.zmq_sample(sample)
+				response = self.zmq_sample(sample)
+				if response['type'] == 'clock':
+					self.log_msg('Caught time update request', '')
+					self.update_clock['secs']
+				if response['type'] == 'config':
+					self.log_msg('Caught Reload Config Request', '')
 			except:
 				if self.REBOOT_ENABLED:
 					self.shutdown()
