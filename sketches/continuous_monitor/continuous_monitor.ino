@@ -1,5 +1,5 @@
 /* 
-  Hive Monitor ("No Down" Version)
+  Hive Monitor ("Continuous" Version)
   Developed by Trevor Stanhope
   DAQ controller for hive sensor monitoring.
 */

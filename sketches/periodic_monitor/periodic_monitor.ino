@@ -1,5 +1,5 @@
 /* 
-  Hive Monitor ("Power Cycle" Version)
+  Hive Monitor ("Periodic" Version)
   Developed by Trevor Stanhope
   DAQ controller for hive sensor monitoring.
 */
