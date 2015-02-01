@@ -45,11 +45,6 @@ def py_error_handler(filename, line, function, err, fmt):
   pass
 C_ERROR_HANDLER = ERROR_HANDLER_FUNC(py_error_handler)
 
-## Pretty Print
-def pretty_print(classifier, msg):
-    date = datetime.strftime(datetime.now(), '%d/%b/%Y:%H:%M:%S')
-    print('[%s] %s %s' % (date, classifier, msg))
-
 # Node
 class HiveNode:
 
@@ -60,10 +55,10 @@ class HiveNode:
         if not config:
             self.REBOOT_ENABLED = False
             self.ZMQ_ENABLED = True
-            self.ZMQ_SERVER = "tcp://192.168.0.199:1980"
+            self.ZMQ_SERVER = "tcp://127.0.0.1:1980"
             self.ZMQ_TIMEOUT = 5000
             self.WAN_ENABLED = False
-            self.WAN_URL = "http://hivemind.mobi/new"
+            self.WAN_URL = "http://127.0.0.1:5000/new"
             self.ARDUINO_ENABLED = True
             self.ARDUINO_DEV = "/dev/ttyS0"
             self.ARDUINO_BAUD = 9600
@@ -96,7 +91,7 @@ class HiveNode:
     
     ## Load Config File
     def load_config(self, config):
-        self.log_msg('Loading Config File', 'OK')
+        self.log_msg('CONFIG', 'Loading Config File')
         with open(config) as config_file:
             settings = json.loads(config_file.read())
             for key in settings:
@@ -105,16 +100,14 @@ class HiveNode:
                 except AttributeError as error:
                     self.log_msg('CONFIG', '%s : %s' % (key, str(settings[key])))
                     setattr(self, key, settings[key])
-        self.log_msg('Loading Config File', 'OK')
                     
     ## Initialize tasks
-    def init_tasks(self):    
+    def init_tasks(self):
+        self.log_msg('CHERRYPY', 'Initializing Tasks')    
         try:
             Monitor(cherrypy.engine, self.update, frequency=self.PING_INTERVAL).subscribe()
-            msg = 'OK'
         except Exception as error:
-            msg = 'ERROR : %s' % str(error)
-        self.log_msg('Initializing Tasks', msg)
+            self.log_msg('CHERRYPY', 'ERROR : %s' % str(error))
     
     ## Initialize CSV backups
     def init_csv(self):
@@ -122,12 +115,11 @@ class HiveNode:
             for param in self.PARAMS:
                 try:
                     open('data/' + param + '.csv', 'a')
-                    print('\tUSING EXISTING FILE: ' + param)
+                    self.log_msg('CSV', 'Using EXISTING file for %s' % param)
                 except Exception:
-                    print('\tCREATING NEW FILE: ' + param)
-                    with open('data/' + param + '.csv', 'w') as csv_file:
+                    self.log_msg('CSV', 'Using NEW file for %s' % param)
+                    with open('data/%s.csv' % param, 'w') as csv_file:
                         csv_file.write('date,val,\n') # no spaces!
-            self.log_msg('Initializing CSV Logs', 'OK')
                         
     ## Initialize ZMQ messenger                    
     def init_zmq(self):
@@ -254,6 +246,7 @@ class HiveNode:
 
     ## Send sample to aggregator
     def zmq_sample(self, sample):
+        self.log_msg('ZMQ', 'Sending to Aggregator')
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
@@ -262,16 +255,15 @@ class HiveNode:
                 if socks.get(self.socket) == zmq.POLLIN:
                     dump = self.socket.recv(zmq.NOBLOCK)
                     response = json.loads(dump)
-                    msg = 'OKAY : %s' % str(response)
+                    self.log_msg('ZMQ', str(response))
                     result = response
                 else:
-                    msg = 'ERROR : Poll Timeout'
+                    self.log_msg('ZMQ', 'ERROR : Poll Timeout')
                     result = None
             else:
-                msg = 'ERROR : Socket Timeout'
+                self.log_msg('ZMQ', 'ERROR : Socket Timeout')
         except Exception as error:
-            msg = 'ERROR : %s' % str(error)
-        self.log_msg('Sending to Aggregator', msg)
+            self.log_msg('ZMQ', str(error))
         return result
             
     ## Save Data
