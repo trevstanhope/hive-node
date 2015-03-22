@@ -55,7 +55,7 @@ class HiveNode:
         if not config:
             self.REBOOT_ENABLED = False
             self.ZMQ_ENABLED = True
-            self.ZMQ_SERVER = "tcp://192.168.0.104:1980"
+            self.ZMQ_SERVER = "tcp://192.168.0.100:1980"
             self.ZMQ_TIMEOUT = 5000
             self.WAN_ENABLED = False
             self.WAN_URL = "http://127.0.0.1:5000/new"
