@@ -32,6 +32,7 @@ from cherrypy.process.plugins import Monitor
 from cherrypy import tools
 import logging
 import socket
+import cv2
 
 # Constants
 try:
@@ -54,26 +55,20 @@ class HiveNode:
         # Configuration
         if not config:
             self.REBOOT_ENABLED = False
-            self.ZMQ_ENABLED = True
             self.ZMQ_SERVER = "tcp://192.168.0.100:1980"
             self.ZMQ_TIMEOUT = 5000
-            self.WAN_ENABLED = False
             self.WAN_URL = "http://127.0.0.1:5000/new"
-            self.ARDUINO_ENABLED = True
             self.ARDUINO_DEV = "/dev/ttyS0"
             self.ARDUINO_BAUD = 9600
             self.ARDUINO_TIMEOUT = 3
-            self.MICROPHONE_ENABLED = True
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100
             self.MICROPHONE_CHUNK = 4096
             self.MICROPHONE_FORMAT = 8
-            self.CAMERA_ENABLED = False
+            self.CAMERA_INDEX = 0
             self.CHERRYPY_PORT = 8081
             self.CHERRYPY_ADDR ="0.0.0.0"
             self.PING_INTERVAL = 1
-            self.CSV_ENABLED = False
-            self.LOG_ENABLED = True
             self.LOG_FILE = "log.txt"
             self.PARAMS = ["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
             self.HIVE_ID = socket.gethostname()
@@ -107,82 +102,81 @@ class HiveNode:
         try:
             Monitor(cherrypy.engine, self.update, frequency=self.PING_INTERVAL).subscribe()
         except Exception as error:
-            self.log_msg('CHERRYPY', 'ERROR : %s' % str(error))
+            self.log_msg('INIT TASKS', 'ERROR : %s' % str(error))
     
     ## Initialize CSV backups
     def init_csv(self):
-        if self.CSV_ENABLED:
-            for param in self.PARAMS:
-                try:
-                    open('data/' + param + '.csv', 'a')
-                    self.log_msg('CSV', 'Using EXISTING file for %s' % param)
-                except Exception:
-                    self.log_msg('CSV', 'Using NEW file for %s' % param)
-                    with open('data/%s.csv' % param, 'w') as csv_file:
-                        csv_file.write('date,val,\n') # no spaces!
-                        
-    ## Initialize ZMQ messenger                    
-    def init_zmq(self):
-        if self.ZMQ_ENABLED:
+        self.NODE_DIR = os.path.dirname(os.path.abspath(__file__))
+        for param in self.PARAMS:
             try:
-                self.context = zmq.Context()
-                self.socket = self.context.socket(zmq.REQ)
-                self.socket.connect(self.ZMQ_SERVER)
-                self.poller = zmq.Poller()
-                self.poller.register(self.socket, zmq.POLLIN)
-                msg = 'OK'
-            except Exception as error:
-                msg = 'ERROR : %s' % str(error)
-            self.log_msg('Initializing ZMQ', msg)
+                csv_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
+                csv_file = open(csv_path, 'a')
+                self.log_msg('CSV', 'Using EXISTING file for %s' % param)
+            except Exception:
+                self.log_msg('CSV', 'Using NEW file for %s' % param)
+                with open(csv_path, 'w') as csv_file:
+                    csv_file.write('date,val,\n') # no spaces!
+                        
+    ## Initialize ZMQ messenger
+    def init_zmq(self):
+        try:
+            self.context = zmq.Context()
+            self.socket = self.context.socket(zmq.REQ)
+            self.socket.connect(self.ZMQ_SERVER)
+            self.poller = zmq.Poller()
+            self.poller.register(self.socket, zmq.POLLIN)
+            msg = 'OK'
+        except Exception as error:
+            msg = 'ERROR : %s' % str(error)
+        self.log_msg('INIT ZMQ', msg)
     
     ## Initialize Logging
     def init_logging(self):    
-        if self.LOG_ENABLED:
-            try:
-                logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
-                msg = 'OK'
-            except Exception as error:
-                msg = 'ERROR : %s' % str(error)
-            self.log_msg('Initializing Log File', msg)
+        try:
+            logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
+            msg = 'OK'
+        except Exception as error:
+            msg = 'ERROR : %s' % str(error)
+        self.log_msg('INIT LOG', msg)
     
     ## Initialize Arduino
-    def init_arduino(self):        
-        if self.ARDUINO_ENABLED:
-            try:
-                self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
-                msg = 'OK'
-            except Exception as error:
-                msg = '\tERROR : %s' % str(error)
-            self.log_msg('Initializing Arduino', msg)
+    def init_arduino(self):
+        try:
+            self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
+            msg = 'OK'
+        except Exception as error:
+            msg = '\tERROR : %s' % str(error)
+        self.log_msg('INIT ARDUINO', msg)
     
-    ## Initialize Microphone    
+    ## Initialize Microphone
     def init_mic(self):
-        if self.MICROPHONE_ENABLED:
-            try:
-                asound = cdll.LoadLibrary('libasound.so')
-                asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
-                mic = pyaudio.PyAudio()
-                self.microphone = mic.open(
-                    format=self.MICROPHONE_FORMAT,
-                    channels=self.MICROPHONE_CHANNELS,
-                    rate=self.MICROPHONE_RATE,
-                    input=True,
-                    frames_per_buffer=self.MICROPHONE_CHUNK
-                )
-                self.microphone.stop_stream()
-                msg = 'OK'
-            except Exception as error:
-                msg = 'ERROR : %s' % str(error)
-            self.log_msg('Initializing Microphone', msg)
+        try:
+            asound = cdll.LoadLibrary('libasound.so')
+            asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
+            mic = pyaudio.PyAudio()
+            self.microphone = mic.open(
+                format=self.MICROPHONE_FORMAT,
+                channels=self.MICROPHONE_CHANNELS,
+                rate=self.MICROPHONE_RATE,
+                input=True,
+                frames_per_buffer=self.MICROPHONE_CHUNK
+            )
+            self.microphone.stop_stream()
+            msg = 'OK'
+        except Exception as error:
+            msg = 'ERROR : %s' % str(error)
+        self.log_msg('INIT MIC', msg)
     
     ## Initialize camera
     def init_cam(self):
-        if self.CAMERA_ENABLED:
-            self.log_msg('Initializing Microphone', 'OK')
+        self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
+        self.log_msg('INIT CAM', 'ERROR')
 
     ## Capture Audio
     def capture_audio(self):
         self.log_msg('MICROPHONE', 'Capturing Audio')
+        rms_decibels = None
+        dominant_hertz = None
         try:
             self.microphone.start_stream()
             data = self.microphone.read(self.MICROPHONE_CHUNK)
@@ -198,25 +192,29 @@ class HiveNode:
             rms_decibels =  10*np.log10(rms_amplitude)
             sorted_peaks = np.argsort(np.abs(wave_fft))
             sorted_hertz = self.MICROPHONE_RATE*abs(wave_freqs[sorted_peaks])
-            result = {
-                'db' : rms_decibels,
-                'hz' : dominant_hertz,
-                }
-            self.log_msg('MICROPHONE', 'OK : %s' % str(result))
         except Exception as error:
-            result = {'microphone_error': str(error)}
             self.log_msg('MICROPHONE', 'ERROR : %s' % str(error))
+        result = {
+            'db' : rms_decibels,
+            'hz' : dominant_hertz
+        }
+        self.log_msg('MICROPHONE', str(result))
         return result
     
     ## Capture Video
     def capture_video(self):
+        self.log_msg('CV2', 'Capturing Video')
+        num_bees = None
         try:
-            result = {'bees': 0} #! Added camera function
+            (s, bgr) = self.camera.read()
+            if s:
+                pass #! TODO Add computer vision analysis to function
             self.log_msg('CV2', 'OKAY: %s' % str(result))
         except Exception as error:
-            result = {'camera_error': str(error)}
             self.log_msg('CV2', 'ERROR : %s' % str(error))
-        self.log_msg('CV2', 'Capturing Video')
+        result = {
+            'bees' : num_bees
+        }
         return result
 
     ## Read Arduino
@@ -273,17 +271,18 @@ class HiveNode:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             for param in self.PARAMS:
                 try:
-                    with open('data/' + param + '.csv', 'a') as csv_file:
+                    csv_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
+                    with open(csv_path, 'a') as csv_file:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                 except Exception as error:
-                    self.log_msg('CSV', 'ERROR: %s' % str(error))
+                    self.log_msg('CSV', 'Could not write key: %s' % str(error))
         
     ## Generate blank sample
     def blank_sample(self):
         self.log_msg('MISC', 'Generating Blank Sample')
         sample = {
             'type' : 'sample',
-            'fake_time' : datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'),
+            'time' : datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'),
             'hive_id' : self.HIVE_ID
             }
         return sample
@@ -301,51 +300,41 @@ class HiveNode:
     ## Shutdown
     def shutdown(self):
         self.log_msg('MISC', 'Shutting Down')
-        if self.ARDUINO_ENABLED:
-            try:
-                self.arduino.close()
-            except:
-                pass
-        if self.MICROPHONE_ENABLED:
-            try:
-                self.microphone.close()
-            except:
-                pass
-        if self.CAMERA_ENABLED:
-            try:
-                self.camera.release()
-            except:
-                pass
-        if self.REBOOT_ENABLED:
-            os.system("sudo reboot")
+        try:
+            self.arduino.close()
+        except Exception as e:
+            self.log_msg('CAMERA', str(e))
+        try:
+            self.microphone.close()
+        except Exception as e:
+            self.log_msg('CAMERA', str(e))
+        try:
+            self.camera.release()
+        except Exception as e:
+            self.log_msg('CAMERA', str(e))
+        os.system("sudo reboot")
             
     ## Update to Aggregator
     def update(self):
         sample = self.blank_sample()
-        if self.ARDUINO_ENABLED:
-            arduino_result = self.read_arduino()
-            sample.update(arduino_result)
-        if self.MICROPHONE_ENABLED:
-            microphone_result = self.capture_audio()
-            sample.update(microphone_result)
-        if self.CAMERA_ENABLED:
-            camera_result = self.capture_video()
-            sample.update(camera_result)
-        if self.ZMQ_ENABLED:
-            try:
-                response = self.zmq_sample(sample)
-                if response['type'] == 'clock':
-                    self.log_msg('ZMQ', 'Caught time update request', '')
-                    self.update_clock['secs']
-                if response['type'] == 'config':
-                    self.log_msg('ZMQ', 'Caught Reload Config Request', '')
-            except:
-                if self.REBOOT_ENABLED:
-                    self.shutdown()
-        if self.WAN_ENABLED:
-            self.post_sample(sample)
-        if self.CSV_ENABLED:
-            self.save_sample(sample)
+        arduino_result = self.read_arduino()
+        sample.update(arduino_result)
+        microphone_result = self.capture_audio()
+        sample.update(microphone_result)
+        camera_result = self.capture_video()
+        sample.update(camera_result)
+        try:
+            response = self.zmq_sample(sample)
+            if response['type'] == 'clock':
+                self.log_msg('ZMQ', 'Caught time update request', '')
+                self.update_clock['secs']
+            if response['type'] == 'config':
+                self.log_msg('ZMQ', 'Caught Reload Config Request', '')
+        except:
+            if self.REBOOT_ENABLED:
+                self.shutdown()
+        self.post_sample(sample)
+        self.save_sample(sample)
 
     ## Render Index
     @cherrypy.expose

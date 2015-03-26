@@ -1,3 +1,5 @@
 #!/bin/sh
 cd /usr/share/hive-node
-python hive_node.py settings.json
+git fetch --all
+git reset --hard origin/master
+python hive-node.py settings.json
