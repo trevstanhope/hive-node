@@ -98,11 +98,11 @@ class HiveNode:
                     
     ## Initialize tasks
     def init_tasks(self):
-        self.log_msg('CHERRYPY', 'Initializing Tasks')    
+        self.log_msg('ENGINE', 'Initializing cherrypy monitor tasks ...')    
         try:
             Monitor(cherrypy.engine, self.update, frequency=self.PING_INTERVAL).subscribe()
         except Exception as error:
-            self.log_msg('INIT TASKS', 'ERROR : %s' % str(error))
+            self.log_msg('ENGINE', 'Error: %s' % str(error))
     
     ## Initialize CSV backups
     def init_csv(self):
@@ -119,6 +119,7 @@ class HiveNode:
                         
     ## Initialize ZMQ messenger
     def init_zmq(self):
+	self.log_msg('ZMQ', 'Initializing ZMQ client ...')
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
@@ -127,29 +128,32 @@ class HiveNode:
             self.poller.register(self.socket, zmq.POLLIN)
             msg = 'OK'
         except Exception as error:
-            msg = 'ERROR : %s' % str(error)
-        self.log_msg('INIT ZMQ', msg)
+            msg = 'Error: %s' % str(error)
+        self.log_msg('ZMQ', msg)
     
     ## Initialize Logging
     def init_logging(self):    
+	self.log_msg('LOG', 'Initializing logging ...')
         try:
             logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
             msg = 'OK'
         except Exception as error:
-            msg = 'ERROR : %s' % str(error)
-        self.log_msg('INIT LOG', msg)
+            msg = 'Error: %s' % str(error)
+        self.log_msg('LOG', msg)
     
     ## Initialize Arduino
     def init_arduino(self):
+	self.log_msg('CTRL', 'Initializing controller ...')
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
             msg = 'OK'
         except Exception as error:
-            msg = '\tERROR : %s' % str(error)
-        self.log_msg('INIT ARDUINO', msg)
+            msg = 'Error: %s' % str(error)
+        self.log_msg('CTRL', msg)
     
     ## Initialize Microphone
     def init_mic(self):
+	self.log_msg('MIC', 'Initializing microphone ...')
         try:
             asound = cdll.LoadLibrary('libasound.so')
             asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
@@ -164,17 +168,20 @@ class HiveNode:
             self.microphone.stop_stream()
             msg = 'OK'
         except Exception as error:
-            msg = 'ERROR : %s' % str(error)
-        self.log_msg('INIT MIC', msg)
+            msg = 'Error: %s' % str(error)
+        self.log_msg('MIC', msg)
     
     ## Initialize camera
     def init_cam(self):
-        self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
-        self.log_msg('INIT CAM', 'ERROR')
-
+        self.log_msg('CAM', 'Initializing camera ...')
+	try:
+	    self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
+            self.log_msg('CAM', 'OK')
+	except Exception as error:
+	    self.log_msg('CAM', 'Error: %s' % str(error))
     ## Capture Audio
     def capture_audio(self):
-        self.log_msg('MICROPHONE', 'Capturing Audio')
+        self.log_msg('MIC', 'Capturing audio segment ...')
         rms_decibels = None
         dominant_hertz = None
         try:
@@ -193,58 +200,58 @@ class HiveNode:
             sorted_peaks = np.argsort(np.abs(wave_fft))
             sorted_hertz = self.MICROPHONE_RATE*abs(wave_freqs[sorted_peaks])
         except Exception as error:
-            self.log_msg('MICROPHONE', 'ERROR : %s' % str(error))
+            self.log_msg('MIC', 'Error: %s' % str(error))
         result = {
             'db' : rms_decibels,
             'hz' : dominant_hertz
         }
-        self.log_msg('MICROPHONE', str(result))
+        self.log_msg('MIC', str(result))
         return result
     
     ## Capture Video
     def capture_video(self):
-        self.log_msg('CV2', 'Capturing Video')
+        self.log_msg('CAM', 'Capturing video ...')
         num_bees = None
         try:
             (s, bgr) = self.camera.read()
             if s:
-                pass #! TODO Add computer vision analysis to function
-            self.log_msg('CV2', 'OKAY: %s' % str(result))
+                #! TODO Add computer vision analysis to function
+                self.log_msg('CAM', 'OK')
+            else:
+                self.log_msg('CAM', 'Error: failed to get image')
         except Exception as error:
-            self.log_msg('CV2', 'ERROR : %s' % str(error))
-        result = {
-            'bees' : num_bees
-        }
+            self.log_msg('CAM', 'Error: %s' % str(error))
+        result = {}
         return result
 
     ## Read Arduino
     def read_arduino(self):
-        self.log_msg('ARDUINO', 'Reading Arduino')
+        self.log_msg('CTRL', 'Reading from controller ...')
         try:
             string = self.arduino.readline()
             result = ast.literal_eval(string)
-            self.log_msg('ARDUINO', 'OK : %s' % str(result))
+            self.log_msg('CTRL', 'OK: %s' % str(result))
         except Exception as error:
-            result = {'arduino_error' : str(error)}
-            self.log_msg('ARDUINO', 'ERROR : %s' % str(error))
+            result = {'error' : str(error)}
+            self.log_msg('CTRL', 'Error: %s' % str(error))
         return result
     
     ## Post sample to server
     def post_sample(self, sample):
-        self.log_msg('REST', 'Sending to Server')
+        self.log_msg('REST', 'Posting to webserver ...')
         try:
             dump = json.dumps(sample)
             req = urllib2.Request(self.WAN_URL)
             req.add_header('Content-Type','application/json')
             response = urllib2.urlopen(req, dump)
-            self.log_msg('REST', 'OK : %s' % str(response.getcode()))
+            self.log_msg('REST', 'OK: %s' % str(response.getcode()))
             return response
         except Exception as error:
-            self.log_msg('REST', 'ERROR : %s' % str(error))
+            self.log_msg('REST', 'Error: %s' % str(error))
 
     ## Send sample to aggregator
     def zmq_sample(self, sample):
-        self.log_msg('ZMQ', 'Sending to Aggregator')
+        self.log_msg('ZMQ', 'Pushing to aggregator ...')
         try:
             dump = json.dumps(sample)
             self.socket.send(dump)
@@ -256,17 +263,17 @@ class HiveNode:
                     self.log_msg('ZMQ', str(response))
                     result = response
                 else:
-                    self.log_msg('ZMQ', 'ERROR : Poll Timeout')
+                    self.log_msg('ZMQ', 'Error: Poll Timeout')
                     result = None
             else:
-                self.log_msg('ZMQ', 'ERROR : Socket Timeout')
+                self.log_msg('ZMQ', 'Error: Socket Timeout')
         except Exception as error:
-            self.log_msg('ZMQ', str(error))
+            self.log_msg('ZMQ', 'Error: %s' % str(error))
         return result
             
     ## Save Data
     def save_sample(self, sample):
-        self.log_msg('CSV', 'Saving Data to File')
+        self.log_msg('CSV', 'Saving sample to file ...')
         if sample:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             for param in self.PARAMS:
@@ -275,11 +282,10 @@ class HiveNode:
                     with open(csv_path, 'a') as csv_file:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                 except Exception as error:
-                    self.log_msg('CSV', 'Could not write key: %s' % str(error))
+                    self.log_msg('CSV', 'Error: Could not write key (%s)' % str(error))
         
     ## Generate blank sample
     def blank_sample(self):
-        self.log_msg('MISC', 'Generating Blank Sample')
         sample = {
             'type' : 'sample',
             'time' : datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'),
@@ -299,19 +305,19 @@ class HiveNode:
     
     ## Shutdown
     def shutdown(self):
-        self.log_msg('MISC', 'Shutting Down')
+        self.log_msg('ENGINE', 'Shutting Down')
         try:
             self.arduino.close()
         except Exception as e:
-            self.log_msg('CAMERA', str(e))
+            self.log_msg('CTRL', str(e))
         try:
             self.microphone.close()
         except Exception as e:
-            self.log_msg('CAMERA', str(e))
+            self.log_msg('MIC', str(e))
         try:
             self.camera.release()
         except Exception as e:
-            self.log_msg('CAMERA', str(e))
+            self.log_msg('CAM', str(e))
         os.system("sudo reboot")
             
     ## Update to Aggregator
