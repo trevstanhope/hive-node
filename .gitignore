@@ -3,3 +3,6 @@ log.txt
 #*#
 *.pyc
 data/*.csv
+libs/*/build/
+libs/*/dist/
+*.egg-info
