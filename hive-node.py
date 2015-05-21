@@ -33,6 +33,11 @@ from cherrypy import tools
 import logging
 import socket
 
+try:
+    import Adafruit_DHT
+except Exception:
+    pass
+
 # Constants
 try:
     CONFIG_FILE = sys.argv[1]
