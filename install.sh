@@ -4,7 +4,9 @@
 echo "Installing dependencies ..."
 sudo apt-get update -y
 sudo apt-get upgrade -y
+sudo apt-get install build-essential -y
 sudo apt-get install python -y
+sudo apt-get install python-dev -y
 sudo apt-get install arduino arduino-mk -y
 sudo apt-get install python-zmq -y
 sudo apt-get install python-serial -y
