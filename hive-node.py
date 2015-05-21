@@ -163,14 +163,6 @@ class HiveNode:
             msg = 'Error: %s' % str(error)
         self.log_msg('CTRL', msg)
     
-    ## Initialize DHT Sensor
-    def init_DHT(self, sensor=Adafruit_DHT.AM2302, pin=4):
-        self.log_msg('DHT', 'Initializing DHT sensor ...')
-        try:
-            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
-        except Exception as error:
-            self.log_msg('DHT', 'Error: %s' % str(error))
-    
     ## Initialize BMP Sensor
     def init_BMP(self):
         self.log_msg('BMP', 'Initializing BMP sensor ...')
