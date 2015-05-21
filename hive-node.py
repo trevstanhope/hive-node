@@ -266,7 +266,7 @@ class HiveNode:
         return result
     
     ## Read DHT (if available)
-    def read_DHT(self, sensor=Adafruit_DHT.AM2302, pin=4):
+    def read_DHT(self, sensor=Adafruit_DHT.DHT22, pin=4):
         self.log_msg('DHT', 'Reading from DHT ...')
         try:
             humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
