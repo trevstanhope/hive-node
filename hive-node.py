@@ -204,7 +204,7 @@ class HiveNode:
         self.log_msg('CAM', 'Initializing camera ...')
         try:
             self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
-                self.log_msg('CAM', 'OK')
+            self.log_msg('CAM', 'OK')
         except Exception as error:
             self.log_msg('CAM', 'Error: %s' % str(error))
         
