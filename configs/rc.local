@@ -16,5 +16,8 @@ _IP=$(hostname -I) || true
 if [ "$_IP" ]; then
   printf "My IP address is %s\n" "$_IP"
 fi
-hive-node
+cd /home/pi/hive-node
+git fetch --all
+git reset --hard HEAD
+python hive-node.py
 exit 0
