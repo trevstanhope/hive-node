@@ -267,6 +267,7 @@ class HiveNode:
     
     ## Read DHT (if available)
     def read_DHT(self, sensor=Adafruit_DHT.AM2302, pin=11):
+        self.log_msg('DHT', 'Reading from DHT ...')
         try:
             humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
             result = {
@@ -404,6 +405,7 @@ class HiveNode:
         DHT_result = self.read_DHT()
         sample.update(DHT_result)
         
+        print sample
         try:
             response = self.zmq_sample(sample)
             if response['type'] == 'clock':
