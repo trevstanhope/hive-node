@@ -131,7 +131,7 @@ class HiveNode:
                         
     ## Initialize ZMQ messenger
     def init_zmq(self):
-	self.log_msg('ZMQ', 'Initializing ZMQ client ...')
+        self.log_msg('ZMQ', 'Initializing ZMQ client ...')
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
@@ -145,7 +145,7 @@ class HiveNode:
     
     ## Initialize Logging
     def init_logging(self):    
-	self.log_msg('LOG', 'Initializing logging ...')
+        self.log_msg('LOG', 'Initializing logging ...')
         try:
             logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
             msg = 'OK'
@@ -181,7 +181,7 @@ class HiveNode:
     
     ## Initialize Microphone
     def init_mic(self):
-	self.log_msg('MIC', 'Initializing microphone ...')
+        self.log_msg('MIC', 'Initializing microphone ...')
         try:
             asound = cdll.LoadLibrary('libasound.so')
             asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
