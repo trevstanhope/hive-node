@@ -39,6 +39,11 @@ try:
 except Exception:
     pass
 
+try:
+    import Adafruit_BMP.BMP085 as BMP085
+except Exception:
+    pass
+
 # Constants
 try:
     CONFIG_FILE = sys.argv[1]
@@ -86,6 +91,8 @@ class HiveNode:
         self.init_zmq()
         self.init_logging()
         self.init_arduino()
+        self.init_DHT()
+        self.init_BMP()
         self.init_mic()
         self.init_cam()
     
@@ -148,13 +155,29 @@ class HiveNode:
     
     ## Initialize Arduino
     def init_arduino(self):
-	self.log_msg('CTRL', 'Initializing controller ...')
+        self.log_msg('CTRL', 'Initializing controller ...')
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
             msg = 'OK'
         except Exception as error:
             msg = 'Error: %s' % str(error)
         self.log_msg('CTRL', msg)
+    
+    ## Initialize DHT Sensor
+    def init_DHT(self, sensor='AM2302', pin=11):
+        self.log_msg('DHT', 'Initializing DHT sensor ...')
+        try:
+            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+        except Exception as error:
+            self.log_msg('DHT', 'Error: %s' % str(error))
+    
+    ## Initialize BMP Sensor
+    def init_BMP(self):
+        self.log_msg('BMP', 'Initializing BMP sensor ...')
+        try:
+            self.BMP085 = BMP085.BMP085()
+        except Exception as error:
+            self.log_msg('BMP', 'Error: %s' % str(error))
     
     ## Initialize Microphone
     def init_mic(self):
@@ -179,11 +202,12 @@ class HiveNode:
     ## Initialize camera
     def init_cam(self):
         self.log_msg('CAM', 'Initializing camera ...')
-	try:
-	    self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
-            self.log_msg('CAM', 'OK')
-	except Exception as error:
-	    self.log_msg('CAM', 'Error: %s' % str(error))
+        try:
+            self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
+                self.log_msg('CAM', 'OK')
+        except Exception as error:
+            self.log_msg('CAM', 'Error: %s' % str(error))
+        
     ## Capture Audio
     def capture_audio(self):
         self.log_msg('MIC', 'Capturing audio segment ...')
@@ -229,16 +253,47 @@ class HiveNode:
         result = {}
         return result
 
-    ## Read Arduino
+    ## Read Arduino (if available))
     def read_arduino(self):
         self.log_msg('CTRL', 'Reading from controller ...')
         try:
             string = self.arduino.readline()
             result = ast.literal_eval(string)
             self.log_msg('CTRL', 'OK: %s' % str(result))
-        except Exception as error:
-            result = {'error' : str(error)}
+        except Exception as error:           
+            result = {}
             self.log_msg('CTRL', 'Error: %s' % str(error))
+        return result
+    
+    ## Read DHT (if available)
+    def read_DHT(self, sensor='AM2302', pin=11):
+        try:
+            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+            result = {
+                "dht_t" : temperature,
+                "dht_h" : humidity
+            }
+        except Exception as error:
+            result = {}
+            self.log_msg('DHT', 'Error: %s' % str(error))
+        return result
+        
+    ## Read BMP (if available)
+    def read_BMP(self):
+        try:
+            temperature = self.BMP085.read_temperature()
+            pressure = self.BMP085.read_pressure()
+            altitude = self.BMP085.read_altitude()
+            sealevel_pressure = self.BMP085.read_read_sealevel_pressure()
+            result = {
+                "bmp_t" : temperature,
+                "bmp_a" : altitude,
+                "bmp_p" : pressure,
+                "bmp_s" : sealevel_pressure
+            }
+        except Exception as error:
+            result = {}
+            self.log_msg('BMP', 'Error: %s' % str(error))
         return result
     
     ## Post sample to server
@@ -328,12 +383,27 @@ class HiveNode:
     ## Update to Aggregator
     def update(self):
         sample = self.blank_sample()
+        
+        # Arduino
         arduino_result = self.read_arduino()
         sample.update(arduino_result)
+        
+        # Mic
         microphone_result = self.capture_audio()
         sample.update(microphone_result)
+        
+        # Camera
         camera_result = self.capture_video()
         sample.update(camera_result)
+        
+        # BMP
+        BMP_result = self.read_BMP()
+        sample.update(BMP_result)
+        
+        # DHT
+        DHT_result = self.read_DHT()
+        sample.update(DHT_result)
+        
         try:
             response = self.zmq_sample(sample)
             if response['type'] == 'clock':
