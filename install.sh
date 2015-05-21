@@ -17,7 +17,6 @@ sudo apt-get install python-opencv -y
 sudo apt-get install libasound2-dev alsa-utils -y
 
 # Alamode
-#echo "Setting up Arduino ..."
 echo "Would you like to install Alamode and libraries [y/n]?"
 read ans
 if [ $ans = y -o $ans = Y -o $ans = yes -o $ans = Yes -o $ans = YES ]
@@ -38,6 +37,34 @@ fi
 if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
 then
 echo "Skipping Arduino install"
+fi
+
+# Alamode
+echo "Would you like to install DHT libraries [y/n]?"
+read ans
+if [ $ans = y -o $ans = Y -o $ans = yes -o $ans = Yes -o $ans = YES ]
+then
+    cd libs/Adafruit_Python_DHT
+    sudo python setup.py install
+    cd ../..
+fi
+if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
+then
+echo "Skipping DHT install"
+fi
+
+# Alamode
+echo "Would you like to install BMP libraries [y/n]?"
+read ans
+if [ $ans = y -o $ans = Y -o $ans = yes -o $ans = Yes -o $ans = YES ]
+then
+    cd libs/Adafruit_Python_BMP
+    sudo python setup.py install
+    cd ../..
+fi
+if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
+then
+echo "Skipping BMP install"
 fi
 
 # Connect to local wireless network
