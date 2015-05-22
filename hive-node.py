@@ -333,7 +333,7 @@ class HiveNode:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             for param in self.PARAMS:
                 try:
-                    data_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
+                    csv_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
                     with open(csv_path, 'a') as csv_file:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                 except Exception as error:
