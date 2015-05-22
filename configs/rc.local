@@ -19,5 +19,6 @@ fi
 cd /home/pi/hive-node
 git fetch --all
 git reset --hard HEAD
+git pull
 python hive-node.py
 exit 0
