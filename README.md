@@ -8,11 +8,19 @@ To install all dependencies for the HiveNode, run the following:
     chmod +x install.sh
     ./install.sh
     
-## To Run
+## Running the Node
 The HiveNode daemon will start on boot, via /etc/rc.local, but can be executed
 manually from the git repository:
 
-    sudo python HiveNode.py
+    sudo python hive-node.py
+    
+## Updating
+All changes to the repository will be automatically pulled whenever a node boots while 
+connected to a WAN connection (i.e. "online"). The boot process automatically fetches
+the latest version of the git repository and forces the local code on the node to be overwritten.
+Any local changes to a nodes software will only last until it is rebooted while on a internet
+connection (e.g. temporary changes can be tested, but the node will update to the git version
+when rebooted with WAN)
 
 ## /data
 * CSV-files and JSON-files are temporarily stored here.
