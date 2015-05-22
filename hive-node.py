@@ -94,7 +94,6 @@ class HiveNode:
         self.init_zmq()
         self.init_logging()
         self.init_arduino()
-        self.init_DHT()
         self.init_BMP()
         self.init_mic()
         self.init_cam()
@@ -261,10 +260,10 @@ class HiveNode:
         return result
     
     ## Read DHT (if available)
-    def read_DHT(self, sensor=Adafruit_DHT.DHT22, pin=4):
+    def read_DHT(self, pin=4):
         self.log_msg('DHT', 'Reading from DHT ...')
         try:
-            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+            humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, pin)
             result = {
                 "dht_t" : temperature,
                 "dht_h" : humidity
@@ -334,7 +333,7 @@ class HiveNode:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
             for param in self.PARAMS:
                 try:
-                    csv_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
+                    data_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
                     with open(csv_path, 'a') as csv_file:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                 except Exception as error:
