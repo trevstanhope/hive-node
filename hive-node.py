@@ -10,6 +10,7 @@ TODO:
 - Validate data received from Arduino
 - Add computer vision components
 """
+#abcdefg
 
 __author__ = "Trevor Stanhope"
 __version__ = "1.1a"
@@ -263,7 +264,8 @@ class HiveNode:
     def read_DHT(self, pin=4):
         self.log_msg('DHT', 'Reading from DHT ...')
         try:
-            humidity, temperature = Adafruit_DHT.read_retry(Adafruit_DHT.DHT22, pin)
+            sensor=Adafruit_DHT.DHT22
+            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
             result = {
                 "dht_t" : temperature,
                 "dht_h" : humidity
