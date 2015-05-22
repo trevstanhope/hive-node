@@ -11,6 +11,9 @@ TODO:
 - Add computer vision components
 """
 
+__author__ = "Trevor Stanhope"
+__version__ = "1.1a"
+
 # Libraries
 import zmq
 import ast
