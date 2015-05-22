@@ -10,6 +10,7 @@ TODO:
 - Validate data received from Arduino
 - Add computer vision components
 """
+#abcdefg
 
 # Libraries
 import zmq
@@ -91,7 +92,6 @@ class HiveNode:
         self.init_zmq()
         self.init_logging()
         self.init_arduino()
-        self.init_DHT()
         self.init_BMP()
         self.init_mic()
         self.init_cam()
@@ -258,9 +258,10 @@ class HiveNode:
         return result
     
     ## Read DHT (if available)
-    def read_DHT(self, sensor=Adafruit_DHT.DHT22, pin=4):
+    def read_DHT(self, pin=4):
         self.log_msg('DHT', 'Reading from DHT ...')
         try:
+            sensor=Adafruit_DHT.DHT22
             humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
             result = {
                 "dht_t" : temperature,
