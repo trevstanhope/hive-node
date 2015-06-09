@@ -10,8 +10,7 @@ TODO:
 - Validate data received from Arduino
 - Add computer vision components
 """
-#abcdefg
-
+#abcdefg recently edited by evan june 9th
 __author__ = "Trevor Stanhope"
 __version__ = "1.1a"
 
@@ -37,6 +36,16 @@ from cherrypy import tools
 import logging
 import socket
 import cv2
+#audio libraries
+import matplotlib
+matplotlib.use('TkAgg') # THIS MAKES IT FAST!
+#import numpy
+import scipy
+import struct
+import pyaudio
+import threading
+import pylab
+import struct
 
 try:
     import Adafruit_DHT
@@ -174,26 +183,6 @@ class HiveNode:
         except Exception as error:
             self.log_msg('BMP', 'Error: %s' % str(error))
     
-    ## Initialize Microphone
-    def init_mic(self):
-        self.log_msg('MIC', 'Initializing microphone ...')
-        try:
-            asound = cdll.LoadLibrary('libasound.so')
-            asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
-            mic = pyaudio.PyAudio()
-            self.microphone = mic.open(
-                format=self.MICROPHONE_FORMAT,
-                channels=self.MICROPHONE_CHANNELS,
-                rate=self.MICROPHONE_RATE,
-                input=True,
-                frames_per_buffer=self.MICROPHONE_CHUNK
-            )
-            self.microphone.stop_stream()
-            msg = 'OK'
-        except Exception as error:
-            msg = 'Error: %s' % str(error)
-        self.log_msg('MIC', msg)
-    
     ## Initialize camera
     def init_cam(self):
         self.log_msg('CAM', 'Initializing camera ...')
@@ -203,35 +192,137 @@ class HiveNode:
         except Exception as error:
             self.log_msg('CAM', 'Error: %s' % str(error))
         
-    ## Capture Audio
-    def capture_audio(self):
-        self.log_msg('MIC', 'Capturing audio segment ...')
-        rms_decibels = None
-        dominant_hertz = None
-        try:
-            self.microphone.start_stream()
-            data = self.microphone.read(self.MICROPHONE_CHUNK)
-            self.microphone.stop_stream()
-            wave_array = np.fromstring(data, dtype='int16')
-            wave_fft = np.fft.fft(wave_array)
-            wave_freqs = np.fft.fftfreq(len(wave_fft))
-            dominant_peak = np.argmax(np.abs(wave_fft))
-            dominant_hertz = self.MICROPHONE_RATE*abs(wave_freqs[dominant_peak])
-            dominant_amplitude = np.sqrt(np.abs(wave_fft[dominant_peak])**2)
-            dominant_decibels = 10*np.log10(dominant_amplitude)
-            rms_amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
-            rms_decibels =  10*np.log10(rms_amplitude)
-            sorted_peaks = np.argsort(np.abs(wave_fft))
-            sorted_hertz = self.MICROPHONE_RATE*abs(wave_freqs[sorted_peaks])
-        except Exception as error:
-            self.log_msg('MIC', 'Error: %s' % str(error))
-        result = {
-            'db' : rms_decibels,
-            'hz' : dominant_hertz
-        }
-        self.log_msg('MIC', str(result))
-        return result
-    
+	#I commented out original audio processing code	
+	## Initialize Microphone 
+    #def init_mic(self):
+     #   self.log_msg('MIC', 'Initializing microphone ...')
+      #  try:
+       #     asound = cdll.LoadLibrary('libasound.so')
+        #    asound.snd_lib_error_set_handler(C_ERROR_HANDLER) # Set error handler
+         #   mic = pyaudio.PyAudio()
+          #  self.microphone = mic.open(
+           #     format=self.MICROPHONE_FORMAT,
+            #    channels=self.MICROPHONE_CHANNELS,
+             #   rate=self.MICROPHONE_RATE,
+              #  input=True,
+               # frames_per_buffer=self.MICROPHONE_CHUNK
+            #)
+            #self.microphone.stop_stream()
+            #msg = 'OK'
+       # except Exception as error:
+        #    msg = 'Error: %s' % str(error)
+        #self.log_msg('MIC', msg)
+		
+	## Capture Audio
+   # def capture_audio(self):
+    #    self.log_msg('MIC', 'Capturing audio segment ...')
+     #   rms_decibels = None
+      #  dominant_hertz = None
+       # try:
+        #    self.microphone.start_stream()
+#            data = self.microphone.read(self.MICROPHONE_CHUNK)
+ #           self.microphone.stop_stream()
+  #          wave_array = np.fromstring(data, dtype='int16')
+   #         wave_fft = np.fft.fft(wave_array)
+    #        wave_freqs = np.fft.fftfreq(len(wave_fft))
+     #       dominant_peak = np.argmax(np.abs(wave_fft))
+      #      dominant_hertz = self.MICROPHONE_RATE*abs(wave_freqs[dominant_peak])
+       #     dominant_amplitude = np.sqrt(np.abs(wave_fft[dominant_peak])**2)
+        #    dominant_decibels = 10*np.log10(dominant_amplitude)
+         #   rms_amplitude = np.sqrt(np.mean(np.abs(wave_fft)**2))
+          #  rms_decibels =  10*np.log10(rms_amplitude)
+           # sorted_peaks = np.argsort(np.abs(wave_fft))
+            #sorted_hertz = self.MICROPHONE_RATE*abs(wave_freqs[sorted_peaks])
+ #       except Exception as error:
+  #          self.log_msg('MIC', 'Error: %s' % str(error))
+   #     result = {
+    #        'db' : rms_decibels,
+     #       'hz' : dominant_hertz
+      #  }
+       # self.log_msg('MIC', str(result))
+        #return result
+		
+	#initialize audio  	
+    def __init__mic(self):
+        """minimal garb is executed when class is loaded."""
+        self.RATE=48100
+        self.BUFFERSIZE=2**12 #1024 is a good buffer size
+        self.secToRecord=.1
+        self.threadsDieNow=False
+        self.newAudio=False
+
+    def setup_mic(self):
+        """initialize sound card."""
+
+        self.buffersToRecord=int(self.RATE*self.secToRecord/self.BUFFERSIZE)
+        if self.buffersToRecord==0: self.buffersToRecord=1
+        self.samplesToRecord=int(self.BUFFERSIZE*self.buffersToRecord)
+        self.chunksToRecord=int(self.samplesToRecord/self.BUFFERSIZE)
+        self.secPerPoint=1.0/self.RATE
+
+        self.p = pyaudio.PyAudio()
+        self.inStream = self.p.open(format=pyaudio.paInt16,channels=1,
+            rate=self.RATE,input=True,frames_per_buffer=self.BUFFERSIZE)
+        self.xsBuffer=numpy.arange(self.BUFFERSIZE)*self.secPerPoint
+        self.xs=numpy.arange(self.chunksToRecord*self.BUFFERSIZE)*self.secPerPoint
+        self.audio=numpy.empty((self.chunksToRecord*self.BUFFERSIZE),dtype=numpy.int16)               
+
+    def close_mic(self):
+        """cleanly back out and release sound card."""
+        self.p.close(self.inStream)
+		
+	##Capture Audio	
+	### RECORDING AUDIO ###  
+
+    def getAudio(self):
+        """get a single buffer size worth of audio."""
+        audioString=self.inStream.read(self.BUFFERSIZE)
+        return numpy.fromstring(audioString,dtype=numpy.int16)
+
+    def record(self,forever=True):
+        """record secToRecord seconds of audio."""
+        while True:
+            if self.threadsDieNow: break
+            for i in range(self.chunksToRecord):
+                self.audio[i*self.BUFFERSIZE:(i+1)*self.BUFFERSIZE]=self.getAudio()
+            self.newAudio=True 
+            if forever==False: break
+
+    def continuousStart(self):
+        """CALL THIS to start running forever."""
+        self.t = threading.Thread(target=self.record)
+        self.t.start()
+
+    def continuousEnd(self):
+        """shut down continuous recording."""
+        self.threadsDieNow=True
+
+    ### MATH ###
+
+    def downsample(self,data,mult):
+        """Given 1D data, return the binned average."""
+        overhang=len(data)%mult
+        if overhang: data=data[:-overhang]
+        data=numpy.reshape(data,(len(data)/mult,mult))
+        data=numpy.average(data,1)
+        return data    
+
+    def fft(self,data=None,trimBy=10,logScale=False,divBy=100):
+        if data==None: 
+            data=self.audio.flatten()
+        left,right=numpy.split(numpy.abs(numpy.fft.fft(data)),2)
+        db=numpy.add(left,right[::-1])
+        if logScale:
+            db=numpy.multiply(20,numpy.log10(ys)) # db
+        hz=numpy.arange(self.BUFFERSIZE/2,dtype=float) # hz
+        if trimBy:
+            i=int((self.BUFFERSIZE/2)/trimBy)
+            db=db[:i]
+            hz=hz[:i]*self.RATE/self.BUFFERSIZE
+        if divBy:
+            db=db/float(divBy)
+        return hz,db
+		
     ## Capture Video
     def capture_video(self):
         self.log_msg('CAM', 'Capturing video ...')
