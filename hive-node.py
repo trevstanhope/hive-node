@@ -265,7 +265,7 @@ class SwhRecorder:
         left,right=numpy.split(numpy.abs(numpy.fft.fft(data)),2)
         db=numpy.add(left,right[::-1])
         if logScale:
-            db=numpy.multiply(20,numpy.log10(ys))
+            db=numpy.multiply(20,numpy.log10(db))
         hz=numpy.arange(self.BUFFERSIZE/2,dtype=float)
         if trimBy:
             i=int((self.BUFFERSIZE/2)/trimBy)
