@@ -85,7 +85,7 @@ class HiveNode:
             self.ARDUINO_BAUD = 9600
             self.ARDUINO_TIMEOUT = 3
             self.MICROPHONE_CHANNELS = 1
-            self.MICROPHONE_RATE = 44100
+            self.MICROPHONE_RATE = 48000
             self.MICROPHONE_CHUNK = 4096
             self.MICROPHONE_FORMAT = 8
             self.CAMERA_INDEX = 0
