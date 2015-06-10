@@ -265,8 +265,8 @@ class SwhRecorder:
         left,right=numpy.split(numpy.abs(numpy.fft.fft(data)),2)
         db=numpy.add(left,right[::-1])
         if logScale:
-            db=numpy.multiply(20,numpy.log10(db))
-        hz=numpy.arange(self.BUFFERSIZE/2,dtype=float)
+            db=numpy.multiply(20,numpy.log10(db)) # decibels
+        hz=numpy.arange(self.BUFFERSIZE/2,dtype=float) # frequency
         if trimBy:
             i=int((self.BUFFERSIZE/2)/trimBy)
             db=db[:i]
@@ -275,7 +275,8 @@ class SwhRecorder:
             db=db/float(divBy)
         return hz,db
         		
-	### Initialize audio  	
+	
+    ### Initialize audio  	
     #def init_mic(self):
 		#""" part of revised code for audio processing """
         #self.BUFFERSIZE = 2**12 # 1024 is a good buffer size
