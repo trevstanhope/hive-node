@@ -224,7 +224,7 @@ class SwhRecorder:
         """cleanly back out and release sound card."""
         self.p.close(self.inStream)
     
-    ### RECORDING AUDIO ###  
+    #### RECORDING AUDIO ###  
     
     def getAudio(self):
         """get a single buffer size worth of audio."""
