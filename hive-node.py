@@ -263,17 +263,17 @@ class SwhRecorder:
         if data==None: 
             data=self.audio.flatten()
         left,right=numpy.split(numpy.abs(numpy.fft.fft(data)),2)
-        ys=numpy.add(left,right[::-1])
+        db=numpy.add(left,right[::-1])
         if logScale:
-            ys=numpy.multiply(20,numpy.log10(ys))
-        xs=numpy.arange(self.BUFFERSIZE/2,dtype=float)
+            db=numpy.multiply(20,numpy.log10(ys))
+        hz=numpy.arange(self.BUFFERSIZE/2,dtype=float)
         if trimBy:
             i=int((self.BUFFERSIZE/2)/trimBy)
-            ys=ys[:i]
-            xs=xs[:i]*self.RATE/self.BUFFERSIZE
+            db=db[:i]
+            hz=hz[:i]*self.RATE/self.BUFFERSIZE
         if divBy:
-            ys=ys/float(divBy)
-        return xs,ys
+            db=db/float(divBy)
+        return hz,db
         		
 	### Initialize audio  	
     #def init_mic(self):
