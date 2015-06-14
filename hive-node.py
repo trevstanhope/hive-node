@@ -82,7 +82,7 @@ class HiveNode:
             self.ARDUINO_TIMEOUT = 3
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100
-            self.MICROPHONE_CHUNK = 4096
+            self.MICROPHONE_CHUNK = 8192 
             self.MICROPHONE_FORMAT = pyaudio.paInt16
             self.MICROPHONE_RECORD_SECONDS = 4
             self.MICROPHONE_LOWPASS = 1000 # hz
