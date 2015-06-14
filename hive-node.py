@@ -198,11 +198,11 @@ class HiveNode:
         try:
             self.p = pyaudio.PyAudio()
             self.microphone = self.p.open(
-                format=pyaudio.MICROPHONE_FORMAT,
-                channels=self.MICROPHONE_CHANNELS,
-                rate=self.MICROPHONE_RATE,
-                input=True,
-                frames_per_buffer=self.MICROPHONE_CHUNK)
+                format = self.MICROPHONE_FORMAT,
+                channels = self.MICROPHONE_CHANNELS,
+                rate = self.MICROPHONE_RATE,
+                input = True,
+                frames_per_buffer = self.MICROPHONE_CHUNK)
         except Exception as e:
             raise e
 
