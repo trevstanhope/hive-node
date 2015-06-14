@@ -189,23 +189,6 @@ class HiveNode:
             self.log_msg('CAM', 'OK')
         except Exception as error:
             self.log_msg('CAM', 'Error: %s' % str(error))
-	
-    ## Initialize audio  	
-	def __init__(self, config=None):
-		# Configuration
-		if not config:
-			self.MICROPHONE_CHANNELS = 1
-			self.MICROPHONE_RATE = 44100
-			self.MICROPHONE_CHUNK = 4096
-			self.MICROPHONE_FORMAT = 8
-			self.MICROPHONE_RECORD_SECONDS = 2
-			self.MICROPHONE_LOWPASS = 1000 # hz
-			
-		# Initializers
-		try:
-			self.init_mic()
-		except Exception as e:
-			print str(e)
 
 	## Initialize audio
 	def init_mic(self):
