@@ -83,7 +83,7 @@ class HiveNode:
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100
             self.MICROPHONE_CHUNK = 4096
-            self.MICROPHONE_FORMAT = 8
+            self.MICROPHONE_FORMAT = pyaudio.paInt16
             self.MICROPHONE_RECORD_SECONDS = 4
             self.MICROPHONE_LOWPASS = 1000 # hz
             self.CAMERA_INDEX = 0
@@ -198,7 +198,7 @@ class HiveNode:
         try:
             self.p = pyaudio.PyAudio()
             self.microphone = self.p.open(
-                format=pyaudio.paInt16,
+                format=pyaudio.MICROPHONE_FORMAT,
                 channels=self.MICROPHONE_CHANNELS,
                 rate=self.MICROPHONE_RATE,
                 input=True,
