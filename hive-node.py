@@ -81,7 +81,7 @@ class HiveNode:
             self.ARDUINO_BAUD = 9600
             self.ARDUINO_TIMEOUT = 3
             self.MICROPHONE_CHANNELS = 1
-            self.MICROPHONE_RATE = 48000 #print between error
+            self.MICROPHONE_RATE = 441000 #print between error
             self.MICROPHONE_CHUNK = 1024
             self.MICROPHONE_FORMAT = pyaudio.paInt16
             self.MICROPHONE_RECORD_SECONDS = 2
