@@ -82,7 +82,7 @@ class HiveNode:
             self.ARDUINO_TIMEOUT = 3
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100 #print between error
-            self.MICROPHONE_CHUNK = 512
+            self.MICROPHONE_CHUNK = 1024
             self.MICROPHONE_FORMAT = 8
             self.MICROPHONE_RECORD_SECONDS = 4
             self.MICROPHONE_LOWPASS = 1000 # hz
@@ -219,9 +219,14 @@ class HiveNode:
             # Capture Audio and convert to numeric
             audio = [] 
             for i in range(0, self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS):
-                audioString = self.microphone.read(self.MICROPHONE_CHUNK)
-                audioNumeric = np.fromstring(audioString,dtype=np.int16)
-                audio.append(audioNumeric)
+                print i 
+			        try:
+			            audioString = self.microphone.read(self.MICROPHONE_CHUNK)
+                        audioNumeric = np.fromstring(audioString,dtype=np.int16)
+                        audio.append(audioNumeric)
+			        except IOError:
+			            pass
+			        frames.append(data)
 
             # Calculate Pitch
             pitch = []
