@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 HiveMind Node
-Developed by Trevor Stanhope
+Developed by Trevor Stanhope and Evan Henry
 Hive sensor node based on RaspberryPi and Arduino.
 
 TODO:
