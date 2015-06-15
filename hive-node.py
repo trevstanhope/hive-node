@@ -218,14 +218,14 @@ class HiveNode:
         try:
             # Capture Audio and convert to numeric
             audio = [] 
-            for i in range(0, self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS):
-                print i 
+            for i in range(0, self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
                 try:
                     audioString = self.microphone.read(self.MICROPHONE_CHUNK)
                     audioNumeric = np.fromstring(audioString,dtype=np.int16)
                     audio.append(audioNumeric)
                 except IOError:
                     pass
+                audio.append(audioNumeric)
 
             # Calculate Pitch
             pitch = []
