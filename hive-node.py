@@ -82,9 +82,9 @@ class HiveNode:
             self.ARDUINO_TIMEOUT = 3
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100 #print between error
-            self.MICROPHONE_CHUNK = 4096
+            self.MICROPHONE_CHUNK = 512
             self.MICROPHONE_FORMAT = 8
-            self.MICROPHONE_RECORD_SECONDS = 2
+            self.MICROPHONE_RECORD_SECONDS = 4
             self.MICROPHONE_LOWPASS = 1000 # hz
             self.CAMERA_INDEX = 0
             self.CHERRYPY_PORT = 8081
