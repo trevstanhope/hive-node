@@ -84,7 +84,7 @@ class HiveNode:
             self.MICROPHONE_RATE = 44100
             self.MICROPHONE_CHUNK = 8192 
             self.MICROPHONE_FORMAT = pyaudio.paInt16
-            self.MICROPHONE_RECORD_SECONDS = 4
+            self.MICROPHONE_RECORD_SECONDS = 2
             self.MICROPHONE_LOWPASS = 1000 # hz
             self.CAMERA_INDEX = 0
             self.CHERRYPY_PORT = 8081
