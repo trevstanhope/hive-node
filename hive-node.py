@@ -226,7 +226,6 @@ class HiveNode:
                     audio.append(audioNumeric)
                 except IOError:
                     pass
-                frames.append(data)
 
             # Calculate Pitch
             pitch = []
