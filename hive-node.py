@@ -120,7 +120,8 @@ class HiveNode:
                     
     ## Initialize tasks
     def init_tasks(self):
-        self.log_msg('ENGINE', 'Initializing cherrypy monitor tasks ...')    
+        self.log_msg('ENGINE', 'Initializing cherrypy monitor tasks ...')
+        time.sleep(0.5)        
         try:
             Monitor(cherrypy.engine, self.update, frequency=self.PING_INTERVAL).subscribe()
         except Exception as error:
@@ -128,6 +129,8 @@ class HiveNode:
     
     ## Initialize CSV backups
     def init_csv(self):
+        self.log_msg('CSV', 'Initializing CSV file ,..')
+        time.sleep(0.5)           
         self.NODE_DIR = os.path.dirname(os.path.abspath(__file__))
         for param in self.PARAMS:
             try:
@@ -142,6 +145,7 @@ class HiveNode:
     ## Initialize ZMQ messenger
     def init_zmq(self):
         self.log_msg('ZMQ', 'Initializing ZMQ client ...')
+        time.sleep(0.5)           
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
@@ -156,6 +160,7 @@ class HiveNode:
     ## Initialize Logging
     def init_logging(self):    
         self.log_msg('LOG', 'Initializing logging ...')
+        time.sleep(0.5)           
         try:
             logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
             msg = 'OK'
@@ -166,6 +171,7 @@ class HiveNode:
     ## Initialize Arduino
     def init_arduino(self):
         self.log_msg('CTRL', 'Initializing controller ...')
+        time.sleep(0.5)           
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
             msg = 'OK'
@@ -176,6 +182,7 @@ class HiveNode:
     ## Initialize BMP Sensor
     def init_BMP(self):
         self.log_msg('BMP', 'Initializing BMP sensor ...')
+        time.sleep(0.5)           
         try:
             self.BMP085 = BMP085.BMP085()
         except Exception as error:
@@ -184,6 +191,7 @@ class HiveNode:
     ## Initialize camera
     def init_cam(self):
         self.log_msg('CAM', 'Initializing camera ...')
+        time.sleep(0.5)           
         try:
             self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
             self.log_msg('CAM', 'OK')
@@ -193,6 +201,7 @@ class HiveNode:
     ## Initialize audio
     def init_mic(self):
         self.log_msg('MIC', 'Initializing mic ...')
+        time.sleep(0.5)           
         """ part of revised code for audio processing """
         # Start audio stream
         try:
@@ -204,7 +213,7 @@ class HiveNode:
                 input = True,
                 frames_per_buffer = self.MICROPHONE_CHUNK)
         except Exception as e:
-            raise e
+            self.log_msg("MIC", "ERROR: %s" % str(e))
 
     ## Close Microphone
     def close_mic(self):
