@@ -363,7 +363,7 @@ class HiveNode:
                     with open(csv_path, 'a') as csv_file:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                 except Exception as error:
-                    self.log_msg('CSV', 'Error: Could not write key (%s)' % str(error))
+                    self.log_msg('CSV', 'ERROR: Data did not have key: %s' % str(error))
         
     ## Generate blank sample
     def blank_sample(self):
