@@ -249,7 +249,7 @@ class HiveNode:
 
             # Calculate Decibels
             # audio.flatten() # pull data from record() thread
-            left,right=np.split(np.abs(np.fft.fft(audio)),2)
+            left,right=np.array_split(np.abs(np.fft.fft(audio)),2)
             db = np.add(left,right[::-1])
             db = np.multiply(20,np.log10(db)) # db
             db = np.mean(np.multiply(20,np.log10(db))) # convert to dB
@@ -363,7 +363,7 @@ class HiveNode:
                     with open(csv_path, 'a') as csv_file:
                         csv_file.write(','.join([time, str(sample[param]), '\n']))
                 except Exception as error:
-                    self.log_msg('CSV', 'ERROR: Data did not have key: %s' % str(error))
+                    self.log_msg('CSV', 'Error: Data did not have key: %s' % str(error))
         
     ## Generate blank sample
     def blank_sample(self):
