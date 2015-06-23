@@ -16,6 +16,7 @@ sudo apt-get install python-alsaaudio -y
 sudo apt-get install python-opencv -y
 sudo apt-get install libasound2-dev alsa-utils -y
 sudo apt-get install python-smbus -y
+sudo apt-get install python-matplotlib -y
 
 # Alamode
 echo "Would you like to install Alamode and libraries [y/n]?"
