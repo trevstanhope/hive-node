@@ -243,6 +243,7 @@ class HiveNode:
 
     # Capture Audio
     def capture_audio(self, trimBy=10):
+        self.log_msg('MIC', 'Capturing audio ...')
         db = None
         hz = None
         try:
