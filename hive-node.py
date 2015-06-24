@@ -87,7 +87,7 @@ class HiveNode:
             self.MICROPHONE_RATE = 44100
             self.MICROPHONE_CHUNK = 8192
             self.MICROPHONE_FORMAT = 8
-            self.MICROPHONE_RECORD_SECONDS = 13
+            self.MICROPHONE_RECORD_SECONDS = 3
             self.MICROPHONE_LOWPASS = 880 # hz
             self.MICROPHONE_HIGHPASS = 220
             self.CAMERA_ENABLED = False
