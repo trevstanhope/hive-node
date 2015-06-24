@@ -87,7 +87,7 @@ class HiveNode:
             self.MICROPHONE_RATE = 44100
             self.MICROPHONE_CHUNK = 8192
             self.MICROPHONE_FORMAT = 8
-            self.MICROPHONE_RECORD_SECONDS = 7
+            self.MICROPHONE_RECORD_SECONDS = 3
             self.MICROPHONE_LOWPASS = 880 # hz
             self.MICROPHONE_HIGHPASS = 220
             self.CAMERA_ENABLED = False
@@ -274,7 +274,7 @@ class HiveNode:
             left,right=np.array_split(np.abs(np.fft.fft(audio)),2)
             db = np.add(left,right[::-1])
             db = np.multiply(20,np.log10(db)) # db
-            db = np.mean(np.multiply(20,np.log10(db))) # convert to dB
+            db = np.round(np.mean(np.multiply(20,np.log10(db))), 3) # convert to dB
         except Exception as error:
             self.log_msg('MIC', 'Error: %s' % str(error))
         result = { "db" : db, "hz" : hz}
