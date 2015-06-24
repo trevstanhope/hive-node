@@ -254,7 +254,7 @@ class HiveNode:
             audio = []
             for i in range(0, (self.MICROPHONE_RATE / self.MICROPHONE_CHUNK) * self.MICROPHONE_RECORD_SECONDS): 
                 try:
-                    audioString = self.microphone.readframes(self.microphone.get_read_available())
+                    audioString = self.microphone.read(self.MICROPHONE_CHUNK)
                     audioNumeric = np.fromstring(audioString, dtype=np.int16)
                     audio.append(audioNumeric)
                 except IOError as e:
