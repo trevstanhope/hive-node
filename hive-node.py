@@ -88,7 +88,8 @@ class HiveNode:
             self.MICROPHONE_CHUNK = 8192
             self.MICROPHONE_FORMAT = 8
             self.MICROPHONE_RECORD_SECONDS = 3
-            self.MICROPHONE_LOWPASS = 1000 # hz
+            self.MICROPHONE_LOWPASS = 880 # hz
+            self.MICROPHONE_HIGHPASS = 220
             self.CAMERA_ENABLED = False
             self.CAMERA_INDEX = 0
             self.BMP_ENABLED = True
@@ -265,8 +266,8 @@ class HiveNode:
                 f0 = round(len(index) * self.MICROPHONE_RATE /(2.0 * np.prod(len(signal))), 2)
                 pitch.append(f0)
             pitch = np.array(pitch)
-            pitch_lowpass = pitch[pitch < self.MICROPHONE_LOWPASS]
-            hz = np.median(pitch_lowpass)
+            pitch_bandpass = pitch[np.logical_and(pitch < self.MICROPHONE_LOWPASS, pitch > self.MICROPHONE_HIGHPASS)]
+            hz = np.median(pitch_bandpass)
 
             # Calculate Decibels
             left,right=np.array_split(np.abs(np.fft.fft(audio)),2)
