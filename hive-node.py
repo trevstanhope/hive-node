@@ -274,8 +274,10 @@ class HiveNode:
                 pitch.append(f0)
             pitch = np.array(pitch)
             pitch_bandpass = pitch[np.logical_and(pitch < self.MICROPHONE_LOWPASS, pitch > self.MICROPHONE_HIGHPASS)]
+            pitch_old_bandpass = pitch_old[np.logical_and(pitch_old < self.MICROPHONE_LOWPASS, pitch_old > self.MICROPHONE_HIGHPASS)]
             hz = np.median(pitch_bandpass)
             print pitch_bandpass
+            print pitch_old_bandpass
 
             # Calculate Decibels
             left,right=np.array_split(np.abs(np.fft.fft(audio)),2)
