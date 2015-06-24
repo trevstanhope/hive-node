@@ -251,6 +251,7 @@ class HiveNode:
         try:
             # Capture Audio and convert to numeric
             audio = []
+            self.microphone.start_stream()
             for i in range(0, self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
                 try:
                     audioString = self.microphone.read(self.MICROPHONE_CHUNK)
@@ -258,6 +259,7 @@ class HiveNode:
                     audio.append(audioNumeric)
                 except IOError:
                     pass
+            self.microphone.stop_stream()
 
             # Calculate Pitch
             pitch = []
