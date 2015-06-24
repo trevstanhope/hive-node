@@ -85,7 +85,7 @@ class HiveNode:
             self.MICROPHONE_ENABLED = True
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100
-            self.MICROPHONE_CHUNK = 8192
+            self.MICROPHONE_CHUNK = 4096
             self.MICROPHONE_FORMAT = 8
             self.MICROPHONE_RECORD_SECONDS = 1
             self.MICROPHONE_LOWPASS = 880 # hz
@@ -240,6 +240,7 @@ class HiveNode:
     ## Close Microphone
     def close_mic(self):
         """cleanly back out and release sound card."""
+        self.microphone.stop_stream()
         self.p.close(self.microphone)
 
     # Capture Audio
