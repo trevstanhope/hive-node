@@ -270,6 +270,7 @@ class HiveNode:
                 f0 = round(len(index) * self.MICROPHONE_RATE / (2.0 * np.prod(len(signal))), 2)
                 pitch.append(f0)
             pitch = np.array(pitch)
+            print pitch
             pitch_bandpass = pitch[np.logical_and(pitch < self.MICROPHONE_LOWPASS, pitch > self.MICROPHONE_HIGHPASS)]
             hz = np.median(pitch_bandpass)
             print pitch_bandpass
