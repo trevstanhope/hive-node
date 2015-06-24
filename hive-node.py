@@ -309,7 +309,7 @@ class HiveNode:
         self.log_msg('DHT', 'Reading from DHT ...')
         try:
             sensor=Adafruit_DHT.DHT22
-            humidity, temperature = Adafruit_DHT.read_retries(sensor, pin, retries=5, delay_seconds=1)
+            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin, retries=5, delay_seconds=1)
             result = {
                 "dht_t" : temperature,
                 "dht_h" : humidity
