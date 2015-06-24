@@ -1,0 +1,18 @@
+{
+    "REBOOT_ENABLED": true,
+    "ZMQ_SERVER": "tcp://192.168.0.199:1980",
+    "ZMQ_TIMEOUT": 5000,
+    "WAN_URL": "",
+    "ARDUINO_DEV": "/dev/ttyS0",
+    "ARDUINO_BAUD": 9600,
+    "ARDUINO_TIMEOUT" : 3,
+    "MICROPHONE_CHANNELS": 1,
+    "MICROPHONE_RATE": 44100,
+    "MICROPHONE_CHUNK": 4096,
+    "MICROPHONE_FORMAT": 8,
+    "CHERRYPY_PORT": 8081,
+    "CHERRYPY_ADDR": "0.0.0.0",
+    "PING_INTERVAL": 0.5,
+    "LOG_FILE" : "log.txt",
+    "PARAMS":["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
+}
