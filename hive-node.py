@@ -261,7 +261,13 @@ class HiveNode:
 
             # Calculate Pitch
             pitch = []
+            pitch_old = []
             for signal in audio:
+-               wave_fft = np.fft.fft(wave_array)
+-               wave_freqs = np.fft.fftfreq(len(wave_fft))
+-               dominant_peak = np.argmax(np.abs(wave_fft))
+-               dominant_hertz = self.MICROPHONE_RATE * np.abs(wave_freqs[dominant_peak])
+                pitch_old.append(dominant_hertz)
                 crossing = [math.copysign(1.0, s) for s in signal]
                 index = find(np.diff(crossing));
                 f0 = round(len(index) * self.MICROPHONE_RATE / (2.0 * np.prod(len(signal))), 2)
