@@ -17,6 +17,7 @@ sudo apt-get install python-opencv -y
 sudo apt-get install libasound2-dev alsa-utils -y
 sudo apt-get install python-smbus -y
 sudo apt-get install python-matplotlib -y
+sudo apt-get install python-setuptools -y
 
 # Alamode
 echo "Would you like to install Alamode and libraries [y/n]?"
@@ -38,10 +39,10 @@ sudo cp /usr/share/arduino/libraries/Wire/utility/* /usr/share/arduino/libraries
 fi
 if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
 then
-echo "Skipping Arduino install"
+echo "Skipping Alamode install"
 fi
 
-# Alamode
+# DHT
 echo "Would you like to install DHT libraries [y/n]?"
 read ans
 if [ $ans = y -o $ans = Y -o $ans = yes -o $ans = Yes -o $ans = YES ]
@@ -55,7 +56,7 @@ then
 echo "Skipping DHT install"
 fi
 
-# Alamode
+# BMP
 echo "Would you like to install BMP libraries [y/n]?"
 read ans
 if [ $ans = y -o $ans = Y -o $ans = yes -o $ans = Yes -o $ans = YES ]
