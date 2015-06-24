@@ -261,6 +261,7 @@ class HiveNode:
                     pass
 
             # Calculate Pitch
+            self.log_msg('MIC', 'Capturing dominant frequencies ...')
             pitch = []
             pitch_old = []
             for signal in audio:
@@ -282,6 +283,7 @@ class HiveNode:
             print pitch_old_bandpass
 
             # Calculate Decibels
+            self.log_msg('MIC', 'Calculating average decibel level ...')
             left,right=np.array_split(np.abs(np.fft.fft(audio)),2)
             db = np.add(left,right[::-1])
             db = np.multiply(20,np.log10(db)) # db
