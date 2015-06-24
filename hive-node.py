@@ -75,37 +75,58 @@ class HiveNode:
         # Configuration
         if not config:
             self.REBOOT_ENABLED = False
+            self.ZMQ_ENABLED = True
             self.ZMQ_SERVER = "tcp://192.168.0.100:1980"
             self.ZMQ_TIMEOUT = 5000
-            self.WAN_URL = "http://127.0.0.1:5000/new"
+            self.ARDUINO_ENABLED = True
             self.ARDUINO_DEV = "/dev/ttyS0"
             self.ARDUINO_BAUD = 9600
             self.ARDUINO_TIMEOUT = 3
+            self.MICROPHONE_ENABLED = True
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 44100 #print between error
             self.MICROPHONE_CHUNK = 8192
             self.MICROPHONE_FORMAT = 8
             self.MICROPHONE_RECORD_SECONDS = 3
             self.MICROPHONE_LOWPASS = 1000 # hz
+            self.CAMERA_ENABLED = False
             self.CAMERA_INDEX = 0
+            self.BMP_ENABLED = True
+            self.DHT_ENABLED = True
+            self.DHT_PIN = 4
             self.CHERRYPY_PORT = 8081
             self.CHERRYPY_ADDR = "0.0.0.0"
             self.PING_INTERVAL = 1
+            self.LOG_ENABLED = True
             self.LOG_FILE = "log.txt"
-            self.PARAMS = ["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
+            self.CSV_ENABLED = False
+            self.CSV_PATH = "data"
+            self.CSV_PARAMS = ["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
             self.HIVE_ID = socket.gethostname()
+            self.NODE_DIR = os.path.dirname(os.path.abspath(__file__))
         else:
             self.load_config(config)
 
-        # Initializers
+        # Mandatory Initializers
         self.init_tasks()
-        self.init_csv()
-        self.init_zmq()
-        self.init_logging()
-        self.init_arduino()
-        self.init_BMP()
-        self.init_mic()
-        self.init_cam()
+
+        # Optional Initializers
+        if self.CSV_ENABLED:
+            self.init_csv()
+        if self.ZMQ_ENABLED:
+            self.init_zmq()
+        if self.LOG_ENABLED:
+            self.init_logging()
+        if self.ARDUINO_ENABLED:
+            self.init_arduino()
+        if self.BMP_ENABLED:
+            self.init_BMP()
+        if self.DHT_ENABLED:
+            self.init_DHT()        
+        if self.MICROPHONE_ENABLED:
+            self.init_mic()
+        if self.CAMERA_ENABLED: 
+            self.init_cam()
     
     ## Load Config File
     def load_config(self, config):
@@ -122,7 +143,6 @@ class HiveNode:
     ## Initialize tasks
     def init_tasks(self):
         self.log_msg('ENGINE', 'Initializing cherrypy monitor tasks ...')
-        time.sleep(0.5)        
         try:
             Monitor(cherrypy.engine, self.update, frequency=self.PING_INTERVAL).subscribe()
         except Exception as error:
@@ -131,9 +151,7 @@ class HiveNode:
     ## Initialize CSV backups
     def init_csv(self):
         self.log_msg('CSV', 'Initializing CSV file ,..')
-        time.sleep(0.5)           
-        self.NODE_DIR = os.path.dirname(os.path.abspath(__file__))
-        for param in self.PARAMS:
+        for param in self.CSV_PARAMS:
             try:
                 csv_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
                 csv_file = open(csv_path, 'a')
@@ -146,7 +164,6 @@ class HiveNode:
     ## Initialize ZMQ messenger
     def init_zmq(self):
         self.log_msg('ZMQ', 'Initializing ZMQ client ...')
-        time.sleep(0.5)           
         try:
             self.context = zmq.Context()
             self.socket = self.context.socket(zmq.REQ)
@@ -161,7 +178,6 @@ class HiveNode:
     ## Initialize Logging
     def init_logging(self):    
         self.log_msg('LOG', 'Initializing logging ...')
-        time.sleep(0.5)           
         try:
             logging.basicConfig(filename=self.LOG_FILE,level=logging.DEBUG)
             msg = 'OK'
@@ -172,7 +188,6 @@ class HiveNode:
     ## Initialize Arduino
     def init_arduino(self):
         self.log_msg('CTRL', 'Initializing controller ...')
-        time.sleep(0.5)           
         try:
             self.arduino = Serial(self.ARDUINO_DEV, self.ARDUINO_BAUD, timeout=self.ARDUINO_TIMEOUT)
             msg = 'OK'
@@ -183,16 +198,22 @@ class HiveNode:
     ## Initialize BMP Sensor
     def init_BMP(self):
         self.log_msg('BMP', 'Initializing BMP sensor ...')
-        time.sleep(0.5)           
         try:
             self.BMP085 = BMP085.BMP085()
         except Exception as error:
             self.log_msg('BMP', 'Error: %s' % str(error))
+
+    ## Initialize DHT Sensor
+    def init_DHT(self):
+        self.log_msg('DHT', 'Initializing DHT Sensor')
+        try:
+            pass
+        except Exception as error:
+            self.log_msg('DHT', 'Error: %s' % str(error))
     
     ## Initialize camera
     def init_cam(self):
         self.log_msg('CAM', 'Initializing camera ...')
-        time.sleep(0.5)           
         try:
             self.camera = cv2.VideoCapture(self.CAMERA_INDEX)
             self.log_msg('CAM', 'OK')
@@ -201,9 +222,8 @@ class HiveNode:
 
     ## Initialize audio
     def init_mic(self):
-        self.log_msg('MIC', 'Initializing mic ...')
-        time.sleep(0.5)           
         """ part of revised code for audio processing """
+        self.log_msg('MIC', 'Initializing mic ...')
         # Start audio stream
         try:
             self.p = pyaudio.PyAudio()
@@ -248,7 +268,6 @@ class HiveNode:
             hz = np.median(pitch_lowpass)
 
             # Calculate Decibels
-            # audio.flatten() # pull data from record() thread
             left,right=np.array_split(np.abs(np.fft.fft(audio)),2)
             db = np.add(left,right[::-1])
             db = np.multiply(20,np.log10(db)) # db
@@ -256,6 +275,7 @@ class HiveNode:
         except Exception as error:
             self.log_msg('MIC', 'Error: %s' % str(error))
         return { "db" : db, "hz" : hz}
+    
     ## Capture Video
     def capture_video(self):
         self.log_msg('CAM', 'Capturing video ...')
@@ -317,19 +337,6 @@ class HiveNode:
             self.log_msg('BMP', 'Error: %s' % str(error))
         return result
     
-    ## Post sample to server
-    def post_sample(self, sample):
-        self.log_msg('REST', 'Posting to webserver ...')
-        try:
-            dump = json.dumps(sample)
-            req = urllib2.Request(self.WAN_URL)
-            req.add_header('Content-Type','application/json')
-            response = urllib2.urlopen(req, dump)
-            self.log_msg('REST', 'OK: %s' % str(response.getcode()))
-            return response
-        except Exception as error:
-            self.log_msg('REST', 'Error: %s' % str(error))
-
     ## Send sample to aggregator
     def zmq_sample(self, sample):
         self.log_msg('ZMQ', 'Pushing to aggregator ...')
@@ -353,11 +360,11 @@ class HiveNode:
         return result
             
     ## Save Data
-    def save_sample(self, sample):
+    def csv_sample(self, sample):
         self.log_msg('CSV', 'Saving sample to file ...')
         if sample:
             time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-            for param in self.PARAMS:
+            for param in self.CSV_PARAMS:
                 try:
                     csv_path = os.path.join(self.NODE_DIR, 'data', param + '.csv')
                     with open(csv_path, 'a') as csv_file:
@@ -403,29 +410,40 @@ class HiveNode:
             
     ## Update to Aggregator
     def update(self):
+
+        # Blank Sample
         sample = self.blank_sample()
         
         # Arduino
-        arduino_result = self.read_arduino()
-        sample.update(arduino_result)
+        if self.ARDUINO_ENABLED:
+            arduino_result = self.read_arduino()
+            sample.update(arduino_result)
         
         # Mic
-        microphone_result = self.capture_audio()
-        sample.update(microphone_result)
+        if self.MICROPHONE_ENABLED:
+            microphone_result = self.capture_audio()
+            sample.update(microphone_result)
         
         # Camera
-        camera_result = self.capture_video()
-        sample.update(camera_result)
+        if self.CAMERA_ENABLED:
+            camera_result = self.capture_video()
+            sample.update(camera_result)
         
         # BMP
-        BMP_result = self.read_BMP()
-        sample.update(BMP_result)
+        if self.BMP_ENABLED:
+            BMP_result = self.read_BMP()
+            sample.update(BMP_result)
         
         # DHT
-        DHT_result = self.read_DHT()
-        sample.update(DHT_result)
-        
-        print sample
+        if self.DHT_ENABLED:
+            DHT_result = self.read_DHT()
+            sample.update(DHT_result)
+
+        # CSV
+        if self.CSV_ENABLED:
+            self.csv_sample(sample)
+
+        # ZMQ Push/Pull Handler
         try:
             response = self.zmq_sample(sample)
             if response['type'] == 'clock':
@@ -436,9 +454,7 @@ class HiveNode:
         except:
             if self.REBOOT_ENABLED:
                 self.shutdown()
-        self.post_sample(sample)
-        self.save_sample(sample)
-
+        
     ## Render Index
     @cherrypy.expose
     def index(self):
