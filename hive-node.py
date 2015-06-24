@@ -252,9 +252,9 @@ class HiveNode:
             # Capture Audio and convert to numeric
             audio = []
             print self.microphone.get_read_available()
-            for i in range(self.microphone.get_read_available()): #range(0, self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
+            for i in range(self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
                 try:
-                    audioString = self.microphone.read(self.MICROPHONE_CHUNK)
+                    audioString = self.microphone.read(self.microphone.get_read_available())
                     audioNumeric = np.fromstring(audioString, dtype=np.int16)
                     audio.append(audioNumeric)
                 except IOError:
