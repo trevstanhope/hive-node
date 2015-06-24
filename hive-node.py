@@ -249,7 +249,8 @@ class HiveNode:
         hz = None
         try:
             # Capture Audio and convert to numeric
-            audio = [] 
+            audio = []
+            for i in range(10): audioString = self.microphone.read(self.MICROPHONE_CHUNK)
             for i in range(0, self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
                 try:
                     audioString = self.microphone.read(self.MICROPHONE_CHUNK)
