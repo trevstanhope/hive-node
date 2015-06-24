@@ -37,6 +37,7 @@ import logging
 import socket
 import cv2
 #audio libraries
+import matplotlib
 from matplotlib.mlab import find
 from matplotlib import pyplot as plt
 import pyaudio
