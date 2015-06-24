@@ -257,8 +257,8 @@ class HiveNode:
                     audioString = self.microphone.read(self.MICROPHONE_CHUNK)
                     audioNumeric = np.fromstring(audioString, dtype=np.int16)
                     audio.append(audioNumeric)
-                except IOError:
-                    pass
+                except IOError as e:
+                    print str(e)
 
             # Calculate Pitch
             self.log_msg('MIC', 'Capturing dominant frequencies ...')
