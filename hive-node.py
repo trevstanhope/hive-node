@@ -275,7 +275,9 @@ class HiveNode:
             db = np.mean(np.multiply(20,np.log10(db))) # convert to dB
         except Exception as error:
             self.log_msg('MIC', 'Error: %s' % str(error))
-        return { "db" : db, "hz" : hz}
+        result = { "db" : db, "hz" : hz}
+        self.log_msg('MIC', 'OK: %s' % str(result))
+        return result
     
     ## Capture Video
     def capture_video(self):
