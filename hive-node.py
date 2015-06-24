@@ -250,16 +250,18 @@ class HiveNode:
         hz = None
         try:
             # Capture Audio and convert to numeric
-            audio = []
-            print self.microphone.get_read_available()
-            for i in range(self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
-                try:
-                    audioString = self.microphone.read(self.microphone.get_read_available())
-                    audioNumeric = np.fromstring(audioString, dtype=np.int16)
-                    audio.append(audioNumeric)
-                except IOError:
-                    pass
-
+            #audio = []
+            #print self.microphone.get_read_available()
+            #for i in range(self.MICROPHONE_RATE / self.MICROPHONE_CHUNK * self.MICROPHONE_RECORD_SECONDS): 
+            #    try:
+            #        audioString = self.microphone.read(self.microphone.get_read_available())
+            #        audioNumeric = np.fromstring(audioString, dtype=np.int16)
+            #        audio.append(audioNumeric)
+            #    except IOError:
+            #        pass
+            audioString = self.microphone.read(self.microphone.get_read_available())
+            audioNumeric = np.fromstring(audioString, dtype=np.int16)
+            audio = [audioNumeric]
             # Calculate Pitch
             self.log_msg('MIC', 'Capturing dominant frequencies ...')
             pitch = []
