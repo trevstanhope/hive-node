@@ -263,24 +263,16 @@ class HiveNode:
             # Calculate Pitch
             self.log_msg('MIC', 'Capturing dominant frequencies ...')
             pitch = []
-            pitch_old = []
+            print len(audio)
             for signal in audio:
-                wave_fft = np.fft.fft(signal)
-                wave_freqs = np.fft.fftfreq(len(wave_fft))
-                dominant_peak = np.argmax(np.abs(wave_fft))
-                dominant_hertz = self.MICROPHONE_RATE * np.abs(wave_freqs[dominant_peak])
-                pitch_old.append(dominant_hertz)
                 crossing = [math.copysign(1.0, s) for s in signal]
                 index = find(np.diff(crossing));
                 f0 = round(len(index) * self.MICROPHONE_RATE / (2.0 * np.prod(len(signal))), 2)
                 pitch.append(f0)
             pitch = np.array(pitch)
-            pitch_old = np.array(pitch_old)
             pitch_bandpass = pitch[np.logical_and(pitch < self.MICROPHONE_LOWPASS, pitch > self.MICROPHONE_HIGHPASS)]
-            pitch_old_bandpass = pitch_old[np.logical_and(pitch_old < self.MICROPHONE_LOWPASS, pitch_old > self.MICROPHONE_HIGHPASS)]
             hz = np.median(pitch_bandpass)
             print pitch_bandpass
-            print pitch_old_bandpass
 
             # Calculate Decibels
             self.log_msg('MIC', 'Calculating average decibel level ...')
