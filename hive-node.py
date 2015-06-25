@@ -86,7 +86,7 @@ class HiveNode:
             self.MICROPHONE_ENABLED = True
             self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 48000
-            self.MICROPHONE_CHUNK = 4096
+            self.MICROPHONE_CHUNK = 8192
             self.MICROPHONE_FORMAT = pyaudio.paInt16
             self.MICROPHONE_RECORD_SECONDS = 3
             self.MICROPHONE_LOWPASS = 880 # hz
@@ -261,7 +261,7 @@ class HiveNode:
                     print str(e)
 
             # Calculate Pitch
-            self.log_msg('MIC', 'Capturing dominant frequencies ...')
+            self.log_msg('MIC', 'Calculating dominant frequencies ...')
             pitch = []
             print len(audio)
             for signal in audio:
