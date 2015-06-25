@@ -18,6 +18,9 @@ sudo apt-get install libasound2-dev alsa-utils -y
 sudo apt-get install python-smbus -y
 sudo apt-get install python-matplotlib -y
 sudo apt-get install python-setuptools -y
+sudo apt-get install alsa-source -y
+sudo apt-get install alsa-base -y
+sudo apt-get install alsa-utils -y
 
 # Alamode
 echo "Would you like to install Alamode and libraries [y/n]?"
