@@ -97,3 +97,19 @@ if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
 then
 echo "Skipping start on boot..."
 fi
+
+# Start on boot
+echo "Would you like to configure ALSA [y/n]?"
+read ans
+if [ $ans = y -o $ans = Y -o $ans = yes -o $ans = Yes -o $ans = YES ]
+then
+echo "Setting up ALSA ..."
+sudo cp configs/alsa-base.conf /etc/modprobe.d/
+sudo cp configs/asound.conf /etc/
+sudo amixer set Mic 100% cap
+sudo alsactrl store
+fi
+if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
+then
+echo "Skipping start on boot..."
+fi
