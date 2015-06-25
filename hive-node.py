@@ -84,10 +84,11 @@ class HiveNode:
             self.ARDUINO_BAUD = 9600
             self.ARDUINO_TIMEOUT = 3
             self.MICROPHONE_ENABLED = True
+            self.MICROPHONE_CHANNELS = 1
             self.MICROPHONE_RATE = 16000
             self.MICROPHONE_CHUNK = 2048
             self.MICROPHONE_FORMAT = pyaudio.paInt16
-            self.MICROPHONE_RECORD_SECONDS = 1
+            self.MICROPHONE_RECORD_SECONDS = 5
             self.MICROPHONE_LOWPASS = 880 # hz
             self.MICROPHONE_HIGHPASS = 110
             self.CAMERA_ENABLED = False
@@ -271,7 +272,7 @@ class HiveNode:
             pitch = np.array(pitch)
             print pitch
             pitch_bandpass = pitch[np.logical_and(pitch < self.MICROPHONE_LOWPASS, pitch > self.MICROPHONE_HIGHPASS)]
-            hz = np.mean(pitch_bandpass)
+            hz = np.median(pitch_bandpass)
             print pitch_bandpass
 
             # Calculate Decibels
