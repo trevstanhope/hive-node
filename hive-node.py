@@ -263,17 +263,14 @@ class HiveNode:
             # Calculate Pitch
             self.log_msg('MIC', 'Calculating dominant frequencies ...')
             pitch = []
-            print len(audio)
             for signal in audio:
                 crossing = [math.copysign(1.0, s) for s in signal]
                 index = find(np.diff(crossing));
                 f0 = round(len(index) * self.MICROPHONE_RATE / (2.0 * np.prod(len(signal))), 2)
                 pitch.append(f0)
             pitch = np.array(pitch)
-            print pitch
             pitch_bandpass = pitch[np.logical_and(pitch < self.MICROPHONE_LOWPASS, pitch > self.MICROPHONE_HIGHPASS)]
             hz = np.median(pitch_bandpass)
-            print pitch_bandpass
 
             # Calculate Decibels
             self.log_msg('MIC', 'Calculating average decibel level ...')
@@ -325,6 +322,7 @@ class HiveNode:
                 "dht_t" : temperature,
                 "dht_h" : humidity
             }
+            self.log_msg('DHT', 'OK: %s' % str(result))
         except Exception as error:
             result = {}
             self.log_msg('DHT', 'Error: %s' % str(error))
@@ -343,6 +341,7 @@ class HiveNode:
                 "bmp_p" : pressure,
                 "bmp_s" : sealevel_pressure
             }
+            self.log_msg('BMP', 'OK: %s' % str(result))
         except Exception as error:
             result = {}
             self.log_msg('BMP', 'Error: %s' % str(error))
