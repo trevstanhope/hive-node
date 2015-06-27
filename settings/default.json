@@ -1,7 +1,7 @@
 {
     "REBOOT_ENABLED": true,
     "ZMQ_ENABLED" : true,
-    "ZMQ_SERVER": "tcp://192.168.0.199:1980",
+    "ZMQ_SERVER": "tcp://192.168.0.100:1980",
     "ZMQ_TIMEOUT": 5000,
     "WAN_URL": "",
     "ARDUINO_ENABLED" : true,
