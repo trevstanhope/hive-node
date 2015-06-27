@@ -104,11 +104,13 @@ class HiveNode:
             self.CSV_ENABLED = False
             self.CSV_PATH = "data"
             self.CSV_PARAMS = ["int_t","ext_t","int_h","ext_h","volts","amps","hz","db","pa"]
-            self.HIVE_ID = socket.gethostname()
-            self.NODE_DIR = os.path.dirname(os.path.abspath(__file__))
         else:
             self.load_config(config)
-
+        
+        # System Globals
+        self.HIVE_ID = socket.gethostname()
+        self.NODE_DIR = os.path.dirname(os.path.abspath(__file__))
+        
         # Mandatory Initializers
         self.init_tasks()
 
