@@ -260,7 +260,7 @@ class HiveNode:
                     audioNumeric = np.fromstring(audioString, dtype=np.int16)
                     audio.append(audioNumeric)
                 except IOError as e:
-                    print str(e)
+                    pass
 
             # Calculate Pitch
             self.log_msg('MIC', 'Calculating dominant frequencies ...')
