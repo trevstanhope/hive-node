@@ -107,7 +107,7 @@ echo "Setting up ALSA ..."
 sudo cp configs/alsa-base.conf /etc/modprobe.d/
 sudo cp configs/asound.conf /etc/
 sudo amixer set Mic 100% cap
-sudo alsactrl store
+sudo alsactl store
 fi
 if [ $ans = n -o $ans = N -o $ans = no -o $ans = No -o $ans = NO ]
 then
